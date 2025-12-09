@@ -1,168 +1,252 @@
-// import React from 'react';
-// import { useParams, useNavigate } from 'react-router-dom';
-// import { Container, Typography, Button, Grid, CardMedia } from '@mui/material';
+import { useState, useEffect, useCallback } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { Container, Typography, Button, Box, CardMedia } from "@mui/material";
+import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
+import { ALL_PRODUCTS } from "../data/products";
+import ProductGrid from "../components/ProductGrid";
+import FullscreenViewer from "../components/FullscreenViewer";
 
-// const products = [
-//   { id: 1, name: 'Wireless Earbuds', price: 25, img: 'https://placehold.co/500x400?text=Earbuds&bg=eee&fg=333', description: 'High quality wireless earbuds with long battery life.' },
-//   { id: 2, name: 'Smartwatch', price: 50, img: 'https://placehold.co/500x400?text=Smartwatch&bg=eee&fg=333', description: 'Track your fitness and notifications with style.' },
-//   { id: 3, name: 'Phone Case', price: 10, img: 'https://placehold.co/500x400?text=Phone+Case&bg=eee&fg=333', description: 'Durable and stylish phone case to protect your device.' },
-//   { id: 4, name: 'USB Charger', price: 15, img: 'https://placehold.co/500x400?text=USB+Charger&bg=eee&fg=333', description: 'Fast USB charger for all your devices.' },
-//   { id: 5, name: 'Bluetooth Speaker', price: 30, img: 'https://placehold.co/500x400?text=Speaker&bg=eee&fg=333', description: 'Portable Bluetooth speaker with clear sound.' },
-//   { id: 6, name: 'LED Lamp', price: 20, img: 'https://placehold.co/500x400?text=LED+Lamp&bg=eee&fg=333', description: 'Stylish LED lamp to brighten up any room.' },
-// ];
-
-// const ProductPage: React.FC = () => {
-//   const { id } = useParams();
-//   const navigate = useNavigate();
-
-//   const product = products.find((p) => p.id === Number(id));
-
-//   if (!product) {
-//     return (
-//       <Container sx={{ mt: 6, textAlign: 'center' }}>
-//         <Typography variant="h4" gutterBottom>
-//           Product not found
-//         </Typography>
-//         <Button variant="contained" onClick={() => navigate('/')}>
-//           Back to Home
-//         </Button>
-//       </Container>
-//     );
-//   }
-
-//   const handleAddToCart = () => {
-//     console.log(`Added ${product.name} to cart`);
-//     // TODO: Implement cart logic
-//   };
-
-//   return (
-//     <Container sx={{ mt: 6 }}>
-//       <Button variant="outlined" onClick={() => navigate('/')} sx={{ mb: 3 }}>
-//         &larr; Back to Home
-//       </Button>
-//       <Grid container spacing={4}>
-//         {/* Product Image */}
-//         <Grid item xs={12} md={6}>
-//           <CardMedia
-//             component="img"
-//             image={product.img}
-//             alt={product.name}
-//             sx={{ borderRadius: 2 }}
-//           />
-//         </Grid>
-
-//         {/* Product Details */}
-//         <Grid item xs={12} md={6}>
-//           <Typography variant="h4" gutterBottom>
-//             {product.name}
-//           </Typography>
-//           <Typography variant="h5" color="primary" gutterBottom>
-//             ${product.price}
-//           </Typography>
-//           <Typography variant="body1" sx={{ mb: 4 }}>
-//             {product.description}
-//           </Typography>
-//           <Button
-//             variant="contained"
-//             color="primary"
-//             size="large"
-//             onClick={handleAddToCart}
-//           >
-//             Add to Cart
-//           </Button>
-//         </Grid>
-//       </Grid>
-//     </Container>
-//   );
-// };
-
-// export default ProductPage;
-
-
-
-import React from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { Container, Typography, Button, Box, CardMedia } from '@mui/material';
-
-const products = [
-  { id: 1, name: 'Wireless Earbuds', price: 25, img: 'https://placehold.co/500x400?text=Earbuds&bg=eee&fg=333', description: 'High quality wireless earbuds with long battery life.' },
-  { id: 2, name: 'Smartwatch', price: 50, img: 'https://placehold.co/500x400?text=Smartwatch&bg=eee&fg=333', description: 'Track your fitness and notifications with style.' },
-  { id: 3, name: 'Phone Case', price: 10, img: 'https://placehold.co/500x400?text=Phone+Case&bg=eee&fg=333', description: 'Durable and stylish phone case to protect your device.' },
-  { id: 4, name: 'USB Charger', price: 15, img: 'https://placehold.co/500x400?text=USB+Charger&bg=eee&fg=333', description: 'Fast USB charger for all your devices.' },
-  { id: 5, name: 'Bluetooth Speaker', price: 30, img: 'https://placehold.co/500x400?text=Speaker&bg=eee&fg=333', description: 'Portable Bluetooth speaker with clear sound.' },
-  { id: 6, name: 'LED Lamp', price: 20, img: 'https://placehold.co/500x400?text=LED+Lamp&bg=eee&fg=333', description: 'Stylish LED lamp to brighten up any room.' },
-];
-
-const ProductPage: React.FC = () => {
+export default function ProductPage() {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const product = products.find((p) => p.id === Number(id));
+  const product = ALL_PRODUCTS.find((p) => p.id === Number(id));
+
+  const [mainImage, setMainImage] = useState(product?.images[0] || "");
+  const [viewerOpen, setViewerOpen] = useState(false);
+  const [zoomed, setZoomed] = useState(false);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  useEffect(() => {
+    if (product) {
+      setMainImage(product.images[0]);
+      setZoomed(false);
+    }
+  }, [product]);
 
   if (!product) {
     return (
-      <Container sx={{ mt: 6, textAlign: 'center' }}>
-        <Typography variant="h4" gutterBottom>
-          Product not found
-        </Typography>
-        <Button variant="contained" onClick={() => navigate('/')}>
-          Back to Home
+      <Container sx={{ mt: 6, textAlign: "center" }}>
+        <Typography variant="h4">Product not found</Typography>
+        <Button
+          onClick={() => navigate("/shop")}
+          variant="contained"
+          sx={{ mt: 2 }}
+        >
+          Back to Shop
         </Button>
       </Container>
     );
   }
 
-  const handleAddToCart = () => {
-    console.log(`Added ${product.name} to cart`);
-    // TODO: Implement cart logic
-  };
+  const images = product.images;
+  const index = images.indexOf(mainImage);
+
+  const goNext = useCallback(
+    () => setMainImage(images[(index + 1) % images.length]),
+    [index, images]
+  );
+  const goPrev = useCallback(
+    () => setMainImage(images[(index - 1 + images.length) % images.length]),
+    [index, images]
+  );
+
+  const toggleZoom = () => setZoomed((z) => !z);
+
+  // Related products
+  const relatedByCategory = ALL_PRODUCTS.filter(
+    (p) => p.category === product.category && p.id !== product.id
+  );
+  let relatedProducts = [...relatedByCategory];
+  if (relatedProducts.length < 8) {
+    const fallback = ALL_PRODUCTS.filter((p) => p.id !== product.id)
+      .sort(() => Math.random() - 0.5)
+      .slice(0, 8 - relatedProducts.length);
+    relatedProducts = [...relatedProducts, ...fallback];
+  }
+  relatedProducts = relatedProducts.slice(0, 8);
 
   return (
-    <Container sx={{ mt: 6 }}>
-      <Button variant="outlined" onClick={() => navigate('/')} sx={{ mb: 3 }}>
-        &larr; Back to Home
+    // <Container sx={{ mt: 6 }}>
+    <Box
+      sx={{
+        width: "100%", // full width on small screens
+        maxWidth: 1700, // limit width on large screens
+        mx: "auto", // center horizontally
+        px: { xs: 1, sm: 2 }, // small horizontal padding
+        mt: 6,
+        mb: 8,
+      }}
+    >
+      <Button variant="outlined" onClick={() => navigate(-1)} sx={{ mb: 3 }}>
+        ← Back to Shop
       </Button>
 
+      {/* MAIN SECTION */}
       <Box
         sx={{
-          display: 'flex',
-          flexDirection: { xs: 'column', md: 'row' },
+          display: "flex",
+          flexDirection: { xs: "column", md: "row" },
           gap: 4,
+          // width: "70%",
+          mx: 2,
         }}
       >
-        {/* Product Image */}
+        {/* IMAGE */}
         <Box sx={{ flex: 1 }}>
-          <CardMedia
-            component="img"
-            image={product.img}
-            alt={product.name}
-            sx={{ borderRadius: 2, width: '100%' }}
-          />
+          <Box
+            sx={{
+              width: "100%",
+              borderRadius: 2,
+              overflow: "hidden",
+              cursor: "zoom-in",
+            }}
+            onClick={() => setViewerOpen(true)}
+          >
+            <CardMedia
+              component="img"
+              src={mainImage}
+              alt={product.name}
+              sx={{
+                width: "100%",
+                aspectRatio: "1/1",
+                objectFit: "cover",
+                transition: "transform .3s",
+                "&:hover": { transform: "scale(1.03)" },
+              }}
+            />
+          </Box>
+
+          {/* Thumbnails */}
+          <Box sx={{ display: "flex", gap: 2, mt: 2, overflowX: "auto" }}>
+            {images.map((img) => (
+              <Box
+                key={img}
+                onClick={() => setMainImage(img)}
+                sx={{
+                  width: 90,
+                  height: 90,
+                  borderRadius: 2,
+                  cursor: "pointer",
+                  overflow: "hidden",
+                  border:
+                    img === mainImage
+                      ? "2px solid #1976d2"
+                      : "2px solid transparent",
+                }}
+              >
+                <CardMedia
+                  component="img"
+                  src={img}
+                  sx={{ width: "100%", height: "100%", objectFit: "cover" }}
+                />
+              </Box>
+            ))}
+          </Box>
         </Box>
 
-        {/* Product Details */}
+        {/* DETAILS */}
         <Box sx={{ flex: 1 }}>
-          <Typography variant="h4" gutterBottom>
-            {product.name}
-          </Typography>
-          <Typography variant="h5" color="primary" gutterBottom>
-            ${product.price}
-          </Typography>
-          <Typography variant="body1" sx={{ mb: 4 }}>
-            {product.description}
-          </Typography>
-          <Button
-            variant="contained"
-            color="primary"
-            size="large"
-            onClick={handleAddToCart}
+          <Typography variant="h4">{product.name}</Typography>
+          <Typography
+            variant="subtitle1"
+            sx={{ mb: 1, color: "text.secondary" }}
           >
-            Add to Cart
-          </Button>
+            Category: {product.category}
+          </Typography>
+
+          {/* DESCRIPTION */}
+          {product.description && (
+            <Typography variant="body1" sx={{ mb: 2, color: "text.secondary" }}>
+              {product.description}
+            </Typography>
+          )}
+
+          {/* PRICING */}
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
+            <Typography variant="h5" color="primary" fontWeight={700}>
+              ${product.price}
+            </Typography>
+            {product.originalPrice && product.originalPrice > product.price && (
+              <>
+                <Typography
+                  variant="body1"
+                  sx={{ textDecoration: "line-through", opacity: 0.6 }}
+                >
+                  ${product.originalPrice}
+                </Typography>
+                <Typography color="error" fontWeight={600}>
+                  Save{" "}
+                  {Math.round(
+                    ((product.originalPrice - product.price) /
+                      product.originalPrice) *
+                      100
+                  )}
+                  %
+                </Typography>
+              </>
+            )}
+          </Box>
+
+          {/* ADD TO CART / WISHLIST */}
+          <Box
+            sx={{
+              display: "flex",
+              gap: 2,
+              flexDirection: "row", // always side by side
+              mb: 2,
+            }}
+          >
+            <Button
+              variant="contained"
+              size="large"
+              sx={{ flex: 1 }}
+              disabled={!product.inStock}
+            >
+              {product.inStock ? "Add to Cart" : "Out of Stock"}
+            </Button>
+            <Button
+              variant="outlined"
+              size="large"
+              startIcon={<FavoriteBorderIcon />}
+              sx={{ flex: 1 }}
+            >
+              Add to Wishlist
+            </Button>
+          </Box>
         </Box>
       </Box>
-    </Container>
-  );
-};
 
-export default ProductPage;
+      {/* RELATED PRODUCTS */}
+      <Box sx={{ mt: 8 }}>
+        <Typography variant="h5" sx={{ mb: 3 }}>
+          Related Products
+        </Typography>
+        <ProductGrid
+          products={relatedProducts}
+          onClickProduct={(id) => navigate(`/product/${id}`)}
+          onAddToCart={(e, id) => {
+            e.stopPropagation();
+            console.log("Add to cart", id);
+          }}
+        />
+      </Box>
+
+      {/* FULLSCREEN VIEWER */}
+      <FullscreenViewer
+        open={viewerOpen}
+        images={images}
+        currentIndex={index}
+        onClose={() => setViewerOpen(false)}
+        onPrev={goPrev}
+        onNext={goNext}
+        zoomed={zoomed}
+        toggleZoom={toggleZoom}
+      />
+    </Box>
+    // </Container>
+  );
+}
