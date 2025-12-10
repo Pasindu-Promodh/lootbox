@@ -17,7 +17,16 @@ interface CartDrawerProps {
 }
 
 const CartDrawer: React.FC<CartDrawerProps> = ({ open, onClose }) => {
-  const { cart, total,shipping } = useCart();
+  const { cart, total, shipping } = useCart();
+
+  // Calculate original total (before discount)
+  const originalTotal = cart.reduce(
+    (sum, item) => sum + (item.originalPrice ?? item.price) * item.quantity,
+    0
+  );
+
+  // Discount = originalTotal - discounted total
+  const discountTotal = originalTotal - total;
 
   return (
     <Drawer
@@ -63,7 +72,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ open, onClose }) => {
       <Divider />
 
       {/* Footer */}
-      {cart.length > 0 && (
+      {/* {cart.length > 0 && (
         <Box
           sx={{
             p: 2,
@@ -79,6 +88,89 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ open, onClose }) => {
             Total: Rs {(total + shipping).toFixed(2)}
           </Typography>
           <Button variant="contained" fullWidth color="primary">
+            Checkout
+          </Button>
+        </Box>
+      )} */}
+
+      {/* Footer */}
+      {cart.length > 0 && (
+        <Box
+          sx={{
+            p: 2,
+            position: "sticky",
+            bottom: 0,
+            bgcolor: "background.paper",
+          }}
+        >
+          {/* Original Total */}
+          <Typography
+            variant="body2"
+            sx={{ display: "flex", justifyContent: "space-between" }}
+          >
+            <span>Original Price</span>
+            <span>Rs {originalTotal.toFixed(2)}</span>
+          </Typography>
+
+          {/* Discount */}
+          {discountTotal > 0 && (
+            <Typography
+              variant="body2"
+              color="error"
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                fontWeight: 600,
+              }}
+            >
+              <span>Discount</span>
+              <span>- Rs {discountTotal.toFixed(2)}</span>
+            </Typography>
+          )}
+
+          {/* Price After Discount */}
+          <Typography
+            variant="body2"
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              fontWeight: 500,
+              mt: 1,
+            }}
+          >
+            <span>Subtotal</span>
+            <span>Rs {total.toFixed(2)}</span>
+          </Typography>
+
+          {/* Shipping */}
+          <Typography
+            variant="body2"
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              mt: 1,
+            }}
+          >
+            <span>Shipping</span>
+            <span>Rs {shipping.toFixed(2)}</span>
+          </Typography>
+
+          <Divider sx={{ my: 1 }} />
+
+          {/* Final Total */}
+          <Typography
+            variant="h6"
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              fontWeight: 700,
+            }}
+          >
+            <span>Total</span>
+            <span>Rs {(total + shipping).toFixed(2)}</span>
+          </Typography>
+
+          <Button variant="contained" fullWidth sx={{ mt: 2 }}>
             Checkout
           </Button>
         </Box>

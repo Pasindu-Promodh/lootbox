@@ -6,20 +6,30 @@ import ProductPage from "./pages/ProductPage";
 import Navbar from "./components/Navbar";
 import { CartProvider } from "./context/CartContext";
 import AddToCartOverlay from "./overlays/AddToCartOverlay";
+import { WishListProvider } from "./context/WishListContext";
+import { AuthProvider } from "./AuthContext";
+import AuthCallback from "./AuthCallback";
 
 const App: React.FC = () => {
+  
+
   return (
-    <CartProvider>
-      <AddToCartOverlay />
-      <Router>
-        <Navbar />
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/shop" element={<ShopPage />} />
-          <Route path="/product/:id" element={<ProductPage />} />
-        </Routes>
-      </Router>
-    </CartProvider>
+    <AuthProvider>
+      <CartProvider>
+        <WishListProvider>
+          <AddToCartOverlay />
+          <Router>
+            <Navbar />
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/shop" element={<ShopPage />} />
+              <Route path="/product/:id" element={<ProductPage />} />
+              <Route path="/auth/callback" element={<AuthCallback />} />
+            </Routes>
+          </Router>
+        </WishListProvider>
+      </CartProvider>
+    </AuthProvider>
   );
 };
 

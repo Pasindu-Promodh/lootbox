@@ -1,18 +1,22 @@
 import React, { useEffect, useState } from "react";
 import { Box, Grow } from "@mui/material";
 import { useCart } from "../context/CartContext";
+import { useWishList } from "../context/WishListContext";
 
 const AddToCartOverlay: React.FC = () => {
-  const { lastAddedItem } = useCart(); // store the last added product in context
+  const { lastAddedCart } = useCart(); // store the last added product in context
+  const { lastAddedWishList } = useWishList();
   const [show, setShow] = useState(false);
 
   useEffect(() => {
-    if (lastAddedItem) {
+    if (lastAddedCart || lastAddedWishList) {
       setShow(true);
+      console.log(lastAddedCart);
+      console.log(lastAddedWishList);
       const timer = setTimeout(() => setShow(false), 2000);
       return () => clearTimeout(timer);
     }
-  }, [lastAddedItem]);
+  }, [lastAddedCart, lastAddedWishList]);
 
   if (!show) return null;
 
@@ -44,7 +48,11 @@ const AddToCartOverlay: React.FC = () => {
             fontSize: { xs: 20, md: 28 },
           }}
         >
-          Added to cart successfully!
+          {lastAddedCart
+            ? "Added to cart successfully!"
+            : lastAddedWishList
+            ? "Added to wishlist successfully!"
+            : "Action completed!"}
         </Box>
       </Box>
     </Grow>

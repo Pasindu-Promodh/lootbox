@@ -1,16 +1,19 @@
 import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Container, Typography, Button, Box, CardMedia } from "@mui/material";
-import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import { ALL_PRODUCTS } from "../data/products";
 import ProductGrid from "../components/ProductGrid";
 import FullscreenViewer from "../components/FullscreenViewer";
 import { useCart } from "../context/CartContext";
+import { useWishList } from "../context/WishListContext";
 
 export default function ProductPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { addToCart } = useCart();
+  const { wishList, addToWishList, removeFromWishList } = useWishList();
+
+  const isInWishList = wishList.some((item) => item.id === Number(id));
 
   const product = ALL_PRODUCTS.find((p) => p.id === Number(id));
 
@@ -242,14 +245,28 @@ export default function ProductPage() {
             >
               {product.inStock ? "Add to Cart" : "Out of Stock"}
             </Button>
-            <Button
+            {/* <Button
               variant="outlined"
               size="large"
               startIcon={<FavoriteBorderIcon />}
               sx={{ flex: 1 }}
+              onClick={() => addToWishList(product.id)}
             >
               Add to Wishlist
-            </Button>
+            </Button> */}
+            <Button
+        variant={isInWishList ? "outlined" : "outlined"}
+        size="large"
+        sx={{ flex: 1 }}
+        color={isInWishList ? "error" : "primary"}
+        onClick={() =>
+          isInWishList
+            ? removeFromWishList(product.id)
+            : addToWishList(product.id)
+        }
+      >
+        {isInWishList ? "Remove from Wishlist" : "Add to Wishlist"}
+      </Button>
           </Box>
         </Box>
       </Box>
