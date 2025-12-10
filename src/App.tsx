@@ -9,6 +9,7 @@ import AddToCartOverlay from "./overlays/AddToCartOverlay";
 import { WishListProvider } from "./context/WishListContext";
 import { AuthProvider } from "./AuthContext";
 import AuthCallback from "./AuthCallback";
+import ProfilePage from "./pages/ProfilePage";
 
 const App: React.FC = () => {
   
@@ -25,6 +26,8 @@ const App: React.FC = () => {
               <Route path="/shop" element={<ShopPage />} />
               <Route path="/product/:id" element={<ProductPage />} />
               <Route path="/auth/callback" element={<AuthCallback />} />
+              <Route path="/profile" element={<ProfilePage />} />
+
             </Routes>
           </Router>
         </WishListProvider>
