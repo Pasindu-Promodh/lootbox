@@ -118,9 +118,7 @@
 
 // export default Navbar;
 
-
-
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   AppBar,
   Toolbar,
@@ -168,9 +166,12 @@ const Navbar: React.FC = () => {
 
   const [session, setSession] = useState<any>(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setSession(data.session));
     supabase.auth.onAuthStateChange((_event, session) => setSession(session));
+
+    console.log(import.meta.env.VITE_SUPABASE_URL);
+    console.log(import.meta.env.VITE_SUPABASE_ANON_KEY);
   }, []);
 
   const profileImage = session?.user?.user_metadata?.avatar_url;
@@ -241,10 +242,7 @@ const Navbar: React.FC = () => {
               {/* Login / Profile */}
               {session ? (
                 <IconButton onClick={(e) => setMenuAnchor(e.currentTarget)}>
-                  <Avatar
-                    src={profileImage}
-                    sx={{ width: 32, height: 32 }}
-                  />
+                  <Avatar src={profileImage} sx={{ width: 32, height: 32 }} />
                 </IconButton>
               ) : (
                 <IconButton onClick={handleLogin}>
@@ -316,7 +314,10 @@ const Navbar: React.FC = () => {
 
       {/* Drawers */}
       <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
-      <WishListDrawer open={wishListOpen} onClose={() => setWishListOpen(false)} />
+      <WishListDrawer
+        open={wishListOpen}
+        onClose={() => setWishListOpen(false)}
+      />
     </>
   );
 };
