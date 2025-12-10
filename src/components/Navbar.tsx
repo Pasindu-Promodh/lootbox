@@ -169,9 +169,6 @@ const Navbar: React.FC = () => {
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setSession(data.session));
     supabase.auth.onAuthStateChange((_event, session) => setSession(session));
-
-    console.log(import.meta.env.VITE_SUPABASE_URL);
-    console.log(import.meta.env.VITE_SUPABASE_ANON_KEY);
   }, []);
 
   const profileImage = session?.user?.user_metadata?.avatar_url;
