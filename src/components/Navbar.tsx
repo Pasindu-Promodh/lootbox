@@ -166,7 +166,6 @@ const Navbar: React.FC = () => {
 
   const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
 
-  const user = supabase.auth.getUser(); // async, but okay for UI
   const [session, setSession] = useState<any>(null);
 
   React.useEffect(() => {
