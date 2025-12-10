@@ -159,9 +159,16 @@ const ProductCard: React.FC<Props> = ({
               >
                 Rs {product.originalPrice.toFixed(2)}
               </Typography>
-              <Typography variant="body2" color="error" fontWeight={600} sx={{fontSize:"0.8rem"}}>
+              <Typography
+                variant="body2"
+                color="error"
+                fontWeight={600}
+                sx={{ fontSize: "0.8rem" }}
+              >
                 {Math.round(
-                  ((product.originalPrice - product.price) / product.originalPrice) * 100
+                  ((product.originalPrice - product.price) /
+                    product.originalPrice) *
+                    100
                 )}
                 % OFF
               </Typography>

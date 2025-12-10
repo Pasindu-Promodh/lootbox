@@ -10,6 +10,7 @@ export type Product = {
   inStock: boolean;
   onSale: boolean;
   description: string;
+  longDescription?: string;
 
   // ⭐ NEW FIELDS
   featured: boolean; // highlight on homepage

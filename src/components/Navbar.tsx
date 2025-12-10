@@ -1,26 +1,36 @@
 // Navbar.tsx
 import React, { useState } from "react";
-import { AppBar, Toolbar, IconButton, Box } from "@mui/material";
+import { AppBar, Toolbar, IconButton, Box, Badge } from "@mui/material";
 import HomeIcon from "@mui/icons-material/Home";
 import StorefrontIcon from "@mui/icons-material/Storefront";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import SearchIcon from "@mui/icons-material/Search";
-import PersonIcon from '@mui/icons-material/Person';
+import PersonIcon from "@mui/icons-material/Person";
+import FavoriteIcon from '@mui/icons-material/Favorite';
 import { useNavigate } from "react-router-dom";
 import ProductSearch from "./ProductSearch";
 import { useTheme, useMediaQuery } from "@mui/material";
+import CartDrawer from "./CartDrawer";
+import { useCart } from "../context/CartContext";
 
 const Navbar: React.FC = () => {
   const navigate = useNavigate();
   const theme = useTheme();
+  const { totalItems } = useCart();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+  const [cartOpen, setCartOpen] = useState(false);
 
   const menuIcons = [
-    { icon: <HomeIcon />, onClick: () => navigate("/") },
-    { icon: <StorefrontIcon />, onClick: () => navigate("/shop") },
-    { icon: <ShoppingCartIcon />, onClick: () => alert("Cart clicked") },
-    { icon: <PersonIcon />, onClick: () => alert("Login clicked") },
+    { icon: <HomeIcon />, onClick: () => navigate("/"), count: 0 },
+    { icon: <StorefrontIcon />, onClick: () => navigate("/shop"), count: 0 },
+    {
+      icon: <ShoppingCartIcon />,
+      onClick: () => setCartOpen(true),
+      count: totalItems,
+    },
+    { icon: <FavoriteIcon />, onClick: () => alert("Wishlist clicked"), count: 0 },
+    { icon: <PersonIcon />, onClick: () => alert("Login clicked"), count: 0 },
   ];
 
   return (
@@ -49,7 +59,9 @@ const Navbar: React.FC = () => {
               <ProductSearch width={400} />
               {menuIcons.map((item, idx) => (
                 <IconButton key={idx} color="inherit" onClick={item.onClick}>
-                  {item.icon}
+                  <Badge badgeContent={item.count} color="secondary">
+                    {item.icon}
+                  </Badge>
                 </IconButton>
               ))}
             </Box>
@@ -67,7 +79,9 @@ const Navbar: React.FC = () => {
               </IconButton>
               {menuIcons.map((item, idx) => (
                 <IconButton key={idx} color="inherit" onClick={item.onClick}>
-                  {item.icon}
+                  <Badge badgeContent={item.count} color="secondary">
+                    {item.icon}
+                  </Badge>
                 </IconButton>
               ))}
 
@@ -82,6 +96,8 @@ const Navbar: React.FC = () => {
           )}
         </Toolbar>
       </AppBar>
+      {/* CART SIDE PANEL */}
+      <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
     </>
   );
 };

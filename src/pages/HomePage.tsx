@@ -3,13 +3,15 @@ import { Typography, Button, Box } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { ALL_PRODUCTS } from "../data/products";
 import ProductSlider from "../components/ProductSlider";
+import { useCart } from "../context/CartContext";
 
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
+  const { addToCart } = useCart();
 
-  const handleAddToCart = (event: React.MouseEvent, productId: number) => {
-    event.stopPropagation();
-    console.log(`Product ${productId} added to cart`);
+  const handleAddToCart = (e: React.MouseEvent, productId: number) => {
+    e.stopPropagation();
+    addToCart(productId);
   };
 
   const handleClickProduct = (id: number) => {

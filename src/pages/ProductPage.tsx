@@ -5,10 +5,12 @@ import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import { ALL_PRODUCTS } from "../data/products";
 import ProductGrid from "../components/ProductGrid";
 import FullscreenViewer from "../components/FullscreenViewer";
+import { useCart } from "../context/CartContext";
 
 export default function ProductPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { addToCart } = useCart();
 
   const product = ALL_PRODUCTS.find((p) => p.id === Number(id));
 
@@ -17,8 +19,8 @@ export default function ProductPage() {
   const [zoomed, setZoomed] = useState(false);
 
   useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [id]);
 
   useEffect(() => {
     if (product) {
@@ -31,11 +33,7 @@ export default function ProductPage() {
     return (
       <Container sx={{ mt: 6, textAlign: "center" }}>
         <Typography variant="h4">Product not found</Typography>
-        <Button
-          onClick={() => navigate("/shop")}
-          variant="contained"
-          sx={{ mt: 2 }}
-        >
+        <Button onClick={() => navigate(-1)} variant="contained" sx={{ mt: 2 }}>
           Back to Shop
         </Button>
       </Container>
@@ -69,8 +67,16 @@ export default function ProductPage() {
   }
   relatedProducts = relatedProducts.slice(0, 8);
 
+  const handleAddToCart = (e: React.MouseEvent, productId: number) => {
+    e.stopPropagation();
+    addToCart(productId);
+  };
+
+  const handleClickProduct = (id: number) => {
+    navigate(`/product/${id}`);
+  };
+
   return (
-    // <Container sx={{ mt: 6 }}>
     <Box
       sx={{
         width: "100%", // full width on small screens
@@ -168,7 +174,7 @@ export default function ProductPage() {
           {/* PRICING */}
           <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
             <Typography variant="h5" color="primary" fontWeight={700}>
-              ${product.price}
+              Rs {product.price}
             </Typography>
             {product.originalPrice && product.originalPrice > product.price && (
               <>
@@ -176,7 +182,7 @@ export default function ProductPage() {
                   variant="body1"
                   sx={{ textDecoration: "line-through", opacity: 0.6 }}
                 >
-                  ${product.originalPrice}
+                  Rs {product.originalPrice}
                 </Typography>
                 <Typography color="error" fontWeight={600}>
                   Save{" "}
@@ -189,6 +195,33 @@ export default function ProductPage() {
                 </Typography>
               </>
             )}
+          </Box>
+
+          {/* DELIVERY DATE */}
+          <Box sx={{ mb: 2 }}>
+            <Typography variant="body1" fontWeight={600}>
+              Delivery Date:
+            </Typography>
+            <Typography variant="body2" sx={{ color: "text.secondary" }}>
+              1 – 5 Working Days
+            </Typography>
+          </Box>
+
+          {/* TRUST BADGES */}
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 0.5,
+              mb: 3,
+              p: 2,
+              borderRadius: 2,
+              backgroundColor: "#f7f7f7",
+            }}
+          >
+            <Typography variant="body2">
+              ✔ Cash on Delivery Available
+            </Typography>
           </Box>
 
           {/* ADD TO CART / WISHLIST */}
@@ -205,6 +238,7 @@ export default function ProductPage() {
               size="large"
               sx={{ flex: 1 }}
               disabled={!product.inStock}
+              onClick={() => addToCart(product.id)}
             >
               {product.inStock ? "Add to Cart" : "Out of Stock"}
             </Button>
@@ -227,11 +261,8 @@ export default function ProductPage() {
         </Typography>
         <ProductGrid
           products={relatedProducts}
-          onClickProduct={(id) => navigate(`/product/${id}`)}
-          onAddToCart={(e, id) => {
-            e.stopPropagation();
-            console.log("Add to cart", id);
-          }}
+          onClickProduct={handleClickProduct}
+          onAddToCart={handleAddToCart}
         />
       </Box>
 
@@ -247,6 +278,5 @@ export default function ProductPage() {
         toggleZoom={toggleZoom}
       />
     </Box>
-    // </Container>
   );
 }

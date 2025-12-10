@@ -14,6 +14,7 @@ import {
 import { useNavigate, useLocation } from "react-router-dom";
 import { ALL_PRODUCTS } from "../data/products";
 import ProductGrid from "../components/ProductGrid";
+import { useCart } from "../context/CartContext";
 
 // ---------- Constants ----------
 const CATEGORIES = ["All", "Electronics", "Accessories", "Home"];
@@ -23,6 +24,7 @@ const CHUNK_SIZE = 8;
 const ShopPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { addToCart } = useCart();
 
   // Read filters & sort from URL query params
   const queryParams = useMemo(
@@ -114,9 +116,9 @@ const ShopPage: React.FC = () => {
     return () => io.disconnect();
   }, [filteredSorted.length, itemsToShow, isLoadingMore]);
 
-  const handleAddToCart = (e: React.MouseEvent, id: number) => {
+  const handleAddToCart = (e: React.MouseEvent, productId: number) => {
     e.stopPropagation();
-    alert(`Added product ${id} to cart (demo)`);
+    addToCart(productId);
   };
 
   return (
