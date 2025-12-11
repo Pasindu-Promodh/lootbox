@@ -10,14 +10,17 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import { useCart } from "../context/CartContext";
 import CartItem from "./CartItem";
+import { useNavigate } from "react-router-dom";
 
 interface CartDrawerProps {
   open: boolean;
   onClose: () => void;
+  onClickProduct: (id: number) => void;
 }
 
-const CartDrawer: React.FC<CartDrawerProps> = ({ open, onClose }) => {
+const CartDrawer: React.FC<CartDrawerProps> = ({ open, onClose, onClickProduct }) => {
   const { cart, total, shipping } = useCart();
+  const navigate = useNavigate();
 
   // Calculate original total (before discount)
   const originalTotal = cart.reduce(
@@ -65,33 +68,11 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ open, onClose }) => {
             Your cart is empty
           </Typography>
         ) : (
-          cart.map((item) => <CartItem key={item.id} item={item} />)
+          cart.map((item) => <CartItem key={item.id} item={item}  onClose={onClose} onClickProduct={onClickProduct} />)
         )}
       </Box>
 
       <Divider />
-
-      {/* Footer */}
-      {/* {cart.length > 0 && (
-        <Box
-          sx={{
-            p: 2,
-            position: "sticky",
-            bottom: 0,
-            bgcolor: "background.paper",
-          }}
-        >
-          <Typography variant="subtitle2" color="text.secondary">
-            Shipping: Rs {shipping.toFixed(2)}
-          </Typography>
-          <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 1 }}>
-            Total: Rs {(total + shipping).toFixed(2)}
-          </Typography>
-          <Button variant="contained" fullWidth color="primary">
-            Checkout
-          </Button>
-        </Box>
-      )} */}
 
       {/* Footer */}
       {cart.length > 0 && (
@@ -170,7 +151,15 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ open, onClose }) => {
             <span>Rs {(total + shipping).toFixed(2)}</span>
           </Typography>
 
-          <Button variant="contained" fullWidth sx={{ mt: 2 }}>
+          <Button
+            variant="contained"
+            fullWidth
+            sx={{ mt: 2 }}
+            onClick={() => {
+              onClose();
+              navigate("/checkout");
+            }}
+          >
             Checkout
           </Button>
         </Box>

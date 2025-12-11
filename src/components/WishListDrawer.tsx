@@ -13,9 +13,10 @@ import WishListItem from "./WishListItem";
 interface WishListDrawerProps {
   open: boolean;
   onClose: () => void;
+  onClickProduct: (id: number) => void;
 }
 
-const WishListDrawer: React.FC<WishListDrawerProps> = ({ open, onClose }) => {
+const WishListDrawer: React.FC<WishListDrawerProps> = ({ open, onClose, onClickProduct }) => {
   const { wishList } = useWishList();
 
   return (
@@ -55,7 +56,7 @@ const WishListDrawer: React.FC<WishListDrawerProps> = ({ open, onClose }) => {
             Your wishlist is empty
           </Typography>
         ) : (
-          wishList.map((item) => <WishListItem key={item.id} item={item} />)
+          wishList.map((item) => <WishListItem key={item.id} item={item} onClose={onClose} onClickProduct={onClickProduct} />)
         )}
       </Box>
 

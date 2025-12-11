@@ -8,9 +8,11 @@ import {
 
 interface Props {
   item: WishListItemType;
+  onClose: () => void;
+  onClickProduct: (id: number) => void;
 }
 
-const WishListItem: React.FC<Props> = ({ item }) => {
+const WishListItem: React.FC<Props> = ({ item, onClose, onClickProduct }) => {
   const { removeFromWishList } = useWishList();
 
   return (
@@ -23,8 +25,13 @@ const WishListItem: React.FC<Props> = ({ item }) => {
         // p: 1.5,
         borderRadius: 2,
         boxShadow: 1,
+        cursor: "pointer",
         transition: "transform 0.2s",
         "&:hover": { transform: "scale(1.01)" },
+      }}
+      onClick={() => {
+        onClose();
+        onClickProduct(item.id);
       }}
     >
       {item.image && (
@@ -78,7 +85,13 @@ const WishListItem: React.FC<Props> = ({ item }) => {
         </Box>
       </Box>
 
-      <IconButton onClick={() => removeFromWishList(item.id)} color="error">
+      <IconButton
+        onClick={(e) => {
+          e.stopPropagation();
+          removeFromWishList(item.id);
+        }}
+        color="error"
+      >
         <DeleteIcon />
       </IconButton>
     </Box>

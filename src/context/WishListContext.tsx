@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { ALL_PRODUCTS } from "../data/products";
+import { type Product } from "../data/products";
+import { useNotification } from "./NotificationContext";
+import { getProductById } from "../data/fetchProducts";
 
 export interface WishListItem {
   id: number;
@@ -13,8 +15,8 @@ interface WishListContextType {
   wishList: WishListItem[];
   addToWishList: (id: number) => void;
   removeFromWishList: (id: number) => void;
+  isInWishList: (id: number) => boolean;
   totalWishList: number;
-  lastAddedWishList: WishListItem | null;
 }
 
 const WishListContext = createContext<WishListContextType | null>(null);
@@ -34,34 +36,54 @@ export const WishListProvider: React.FC<{ children: React.ReactNode }> = ({
     return saved ? JSON.parse(saved) : [];
   });
 
-  const [lastAddedWishList, setLastAddedWishList] =
-    useState<WishListItem | null>(null);
+  const { showNotification } = useNotification();
 
   useEffect(() => {
     localStorage.setItem("wishlist", JSON.stringify(wishList));
   }, [wishList]);
 
-  const addToWishList = (id: number) => {
-    const product = ALL_PRODUCTS.find((p) => p.id === id);
-    if (!product) return;
+  const addToWishList = async (id: number) => {
+    try {
+      const product: Product | null = await getProductById(String(id));
 
-    const existing = wishList.find((i) => i.id === id);
-    if (existing) return; // ignore duplicates
+      if (!product) {
+        showNotification("Product not found!", "error");
+        return;
+      }
 
-    const newItem: WishListItem = {
-      id: product.id,
-      name: product.name,
-      price: product.price,
-      originalPrice: product.originalPrice,
-      image: product.images[0],
-    };
+      const newItem: WishListItem = {
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        originalPrice: product.originalPrice,
+        image: product.images[0],
+      };
 
-    setWishList((prev) => [...prev, newItem]);
-    setLastAddedWishList(newItem);
+      const existing = wishList.find((i) => i.id === id);
+
+      if (existing) {
+        showNotification("Already in wishlist!", "info");
+        return;
+      }
+      setWishList((prev) => [...prev, newItem]);
+      showNotification(`${product.name} added to wishlist!`, "success");
+    } catch (err) {
+      console.error("Error adding product to wishlist:", err);
+      showNotification("Failed to add product to wishlist", "error");
+    }
   };
 
-  const removeFromWishList = (id: number) =>
+  const removeFromWishList = (id: number) => {
+    const item = wishList.find((i) => i.id === id);
+    if (item) {
+      showNotification(`${item.name} removed from wishlist`, "error");
+    }
     setWishList((prev) => prev.filter((i) => i.id !== id));
+  };
+
+  const isInWishList = (id: number) => {
+    return wishList.some((i) => i.id === id);
+  };
 
   const totalWishList = wishList.length;
 
@@ -71,8 +93,8 @@ export const WishListProvider: React.FC<{ children: React.ReactNode }> = ({
         wishList,
         addToWishList,
         removeFromWishList,
+        isInWishList,
         totalWishList,
-        lastAddedWishList,
       }}
     >
       {children}

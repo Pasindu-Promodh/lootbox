@@ -2,14 +2,21 @@ import React, { useRef, useEffect } from "react";
 import { Box } from "@mui/material";
 import ProductCard from "./ProductCard";
 import type { Product } from "../data/products";
+import ProductCardSkeleton from "./ProductCardSkeleton";
 
 type Props = {
   products: Product[];
   onClickProduct: (id: number) => void;
   onAddToCart: (e: React.MouseEvent, id: number) => void;
+  loading?: boolean;
 };
 
-const ProductSlider: React.FC<Props> = ({ products, onClickProduct, onAddToCart }) => {
+const ProductSlider: React.FC<Props> = ({
+  products,
+  onClickProduct,
+  onAddToCart,
+  loading,
+}) => {
   const sliderRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -40,21 +47,38 @@ const ProductSlider: React.FC<Props> = ({ products, onClickProduct, onAddToCart 
         scrollbarWidth: "none",
       }}
     >
-      {products.map((p) => (
-        <Box
-          key={p.id}
-          sx={{
-            minWidth: { xs: "50%", sm: "35%", md: "20%" },
-            flexShrink: 0,
-          }}
-        >
-          <ProductCard
-            product={p}
-            onClickProduct={onClickProduct}
-            onAddToCart={onAddToCart}
-          />
-        </Box>
-      ))}
+      {loading ? (
+        Array.from({ length: 6 }).map((_, index) => (
+          <Box
+            key={index}
+            sx={{
+              minWidth: { xs: "50%", sm: "35%", md: "20%" },
+              flexShrink: 0,
+            }}
+          >
+            <ProductCardSkeleton />
+          </Box>
+        ))
+      ) : (
+        <>
+          {products.map((p) => (
+            <Box
+              key={p.id}
+              sx={{
+                minWidth: { xs: "50%", sm: "35%", md: "20%" },
+                flexShrink: 0,
+              }}
+            >
+              <ProductCard
+                key={p.id}
+                product={p}
+                onClickProduct={onClickProduct}
+                onAddToCart={onAddToCart}
+              />
+            </Box>
+          ))}
+        </>
+      )}
     </Box>
   );
 };

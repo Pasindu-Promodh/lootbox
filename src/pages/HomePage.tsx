@@ -1,39 +1,65 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Typography, Button, Box } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import { ALL_PRODUCTS } from "../data/products";
+import { getProducts } from "../data/fetchProducts";
 import ProductSlider from "../components/ProductSlider";
 import { useCart } from "../context/CartContext";
+import type { Product } from "../data/products";
 
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
   const { addToCart } = useCart();
+
+  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
+  const [bestSellers, setBestSellers] = useState<Product[]>([]);
+  const [newArrivals, setNewArrivals] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const handleAddToCart = (e: React.MouseEvent, productId: number) => {
     e.stopPropagation();
     addToCart(productId);
   };
 
-  const handleClickProduct = (id: number) => {
-    navigate(`/product/${id}`);
+  const handleClickProduct = (productId: number) => {
+    navigate(`/product/${productId}`);
   };
 
   useEffect(() => {
     window.scrollTo(0, 0);
+    loadHomeProducts();
   }, []);
 
-  const featuredProducts = ALL_PRODUCTS.filter((p) => p.featured);
+  async function loadHomeProducts() {
+    setLoading(true);
 
-  const bestSellers = [...ALL_PRODUCTS]
-    .sort((a, b) => b.soldCount - a.soldCount)
-    .slice(0, 12);
+    // Fetch only featured products
+    const featured = await getProducts({ limit: 6, featured: true });
+    setFeaturedProducts(featured);
 
-  const newArrivals = [...ALL_PRODUCTS]
-    .sort(
-      (a, b) =>
-        new Date(b.addedDate).getTime() - new Date(a.addedDate).getTime()
-    )
-    .slice(0, 12);
+    // Fetch best sellers (sorted by soldCount)
+    const best = await getProducts({
+      limit: 6,
+      orderBy: { column: "soldCount" },
+    });
+    setBestSellers(best);
+
+    // Fetch newest arrivals (sorted by addedDate)
+    const newProds = await getProducts({
+      limit: 6,
+      orderBy: { column: "addedDate" },
+    });
+    setNewArrivals(newProds);
+
+    setLoading(false);
+  }
+
+  // if (loading) {
+  //   return (
+  //     <Box sx={{ mt: 10, display: "flex", justifyContent: "center" }}>
+  //       <CircularProgress />
+  //     </Box>
+  //   );
+  // }
 
   return (
     <div>
@@ -66,12 +92,7 @@ const HomePage: React.FC = () => {
       </Box>
 
       <Box
-        sx={{
-          width: "100%", // full width on small screens
-          maxWidth: 1700, // limit width on large screens
-          mx: "auto", // center horizontally
-          px: { xs: 1, sm: 2 }, // small horizontal padding
-        }}
+        sx={{ width: "100%", maxWidth: 1700, mx: "auto", px: { xs: 2, sm: 5 } }}
       >
         {/* Featured */}
         <Box sx={{ my: 6 }}>
@@ -83,6 +104,7 @@ const HomePage: React.FC = () => {
             products={featuredProducts}
             onClickProduct={handleClickProduct}
             onAddToCart={handleAddToCart}
+            loading={loading}
           />
         </Box>
 
@@ -91,11 +113,11 @@ const HomePage: React.FC = () => {
           <Typography variant="h4" sx={{ mb: 2 }}>
             Best Sellers
           </Typography>
-
           <ProductSlider
             products={bestSellers}
             onClickProduct={handleClickProduct}
             onAddToCart={handleAddToCart}
+            loading={loading}
           />
         </Box>
 
@@ -104,11 +126,11 @@ const HomePage: React.FC = () => {
           <Typography variant="h4" sx={{ mb: 2 }}>
             New Arrivals
           </Typography>
-
           <ProductSlider
             products={newArrivals}
             onClickProduct={handleClickProduct}
             onAddToCart={handleAddToCart}
+            loading={loading}
           />
         </Box>
       </Box>

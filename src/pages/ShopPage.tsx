@@ -1,4 +1,3 @@
-// src/pages/ShopPage.tsx
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   Typography,
@@ -12,9 +11,10 @@ import {
   FormControlLabel,
 } from "@mui/material";
 import { useNavigate, useLocation } from "react-router-dom";
-import { ALL_PRODUCTS } from "../data/products";
 import ProductGrid from "../components/ProductGrid";
 import { useCart } from "../context/CartContext";
+import { getProducts, getProductsByCategory } from "../data/fetchProducts";
+import type { Product } from "../data/products";
 
 // ---------- Constants ----------
 const CATEGORIES = ["All", "Electronics", "Accessories", "Home"];
@@ -26,12 +26,10 @@ const ShopPage: React.FC = () => {
   const location = useLocation();
   const { addToCart } = useCart();
 
-  // Read filters & sort from URL query params
   const queryParams = useMemo(
     () => new URLSearchParams(location.search),
     [location.search]
   );
-
   const initialCategory = queryParams.get("category") || "All";
   const initialOnlyInStock = queryParams.get("inStock") === "true";
   const initialOnlyOnSale = queryParams.get("onSale") === "true";
@@ -42,16 +40,35 @@ const ShopPage: React.FC = () => {
   const [onlyInStock, setOnlyInStock] = useState<boolean>(initialOnlyInStock);
   const [onlyOnSale, setOnlyOnSale] = useState<boolean>(initialOnlyOnSale);
 
-  // Infinite scroll + loading
+  const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [itemsToShow, setItemsToShow] = useState<number>(CHUNK_SIZE);
   const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false);
+  const [loadingProducts, setLoadingProducts] = useState<boolean>(true);
+  // const [loading, setLoading] = useState(true);
   const observerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
-  // Update URL when filters/sort change
+  // Fetch all products initially
+  useEffect(() => {
+    const loadProducts = async () => {
+      setLoadingProducts(true);
+      let products: Product[] = [];
+      if (category === "All") {
+        products = await getProducts({ limit: 1000 }); // large limit
+      } else {
+        products = await getProductsByCategory(category, 1000); // large limit
+      }
+      setAllProducts(products);
+      setLoadingProducts(false);
+    };
+
+    loadProducts();
+  }, [category]);
+
+  // Update URL query params
   useEffect(() => {
     const params = new URLSearchParams();
     if (category !== "All") params.set("category", category);
@@ -62,25 +79,24 @@ const ShopPage: React.FC = () => {
     navigate({ search: params.toString() }, { replace: true });
   }, [category, onlyInStock, onlyOnSale, sort, navigate]);
 
-  // Filter & sort the full product set based on controls
+  // Filter & sort products
   const filteredSorted = useMemo(() => {
-    let list = ALL_PRODUCTS.filter((p) => {
-      const matchesCategory = category === "All" || p.category === category;
+    let list = allProducts.filter((p) => {
       const matchesStock = onlyInStock ? p.inStock : true;
       const matchesSale = onlyOnSale ? p.onSale : true;
-      return matchesCategory && matchesStock && matchesSale;
+      return matchesStock && matchesSale;
     });
 
     if (sort === "price-asc") {
-      list = list.sort((a, b) => a.price - b.price);
+      list.sort((a, b) => a.price - b.price);
     } else if (sort === "price-desc") {
-      list = list.sort((a, b) => b.price - a.price);
+      list.sort((a, b) => b.price - a.price);
     } else if (sort === "name-asc") {
-      list = list.sort((a, b) => a.name.localeCompare(b.name));
+      list.sort((a, b) => a.name.localeCompare(b.name));
     }
 
     return list;
-  }, [category, onlyInStock, onlyOnSale, sort]);
+  }, [allProducts, onlyInStock, onlyOnSale, sort]);
 
   const visibleItems = filteredSorted.slice(0, itemsToShow);
 
@@ -104,7 +120,7 @@ const ShopPage: React.FC = () => {
                   Math.min(prev + CHUNK_SIZE, filteredSorted.length)
                 );
                 setIsLoadingMore(false);
-              }, 700);
+              }, 500);
             }
           }
         });
@@ -121,13 +137,21 @@ const ShopPage: React.FC = () => {
     addToCart(productId);
   };
 
+  // if (loadingProducts) {
+  //   return (
+  //     <Box sx={{ mt: 10, display: "flex", justifyContent: "center" }}>
+  //       <CircularProgress />
+  //     </Box>
+  //   );
+  // }
+
   return (
     <Box
       sx={{
         width: "100%",
         maxWidth: 1700,
         mx: "auto",
-        px: { xs: 1, sm: 2 },
+        px: { xs: 2, sm: 5 },
         mt: 6,
         mb: 8,
       }}
@@ -146,15 +170,7 @@ const ShopPage: React.FC = () => {
       </Typography>
 
       {/* Category Chips */}
-      <Box
-        sx={{
-          display: "flex",
-          overflowX: "auto",
-          gap: 1,
-          py: 1,
-          mb: 3,
-        }}
-      >
+      <Box sx={{ display: "flex", overflowX: "auto", gap: 1, py: 1, mb: 3 }}>
         {CATEGORIES.map((c) => (
           <Chip
             key={c}
@@ -226,6 +242,7 @@ const ShopPage: React.FC = () => {
         products={visibleItems}
         onClickProduct={(id) => navigate(`/product/${id}`)}
         onAddToCart={handleAddToCart}
+        loading={loadingProducts}
       />
 
       <Box ref={observerRef} sx={{ height: 24, mt: 4 }} />
@@ -237,7 +254,9 @@ const ShopPage: React.FC = () => {
           </Typography>
         ) : (
           <Typography variant="body2" color="text.secondary">
-            {filteredSorted.length === 0 ? "" : "You reached the end."}
+            {filteredSorted.length === 0
+              ? "No products found."
+              : "You reached the end."}
           </Typography>
         )}
       </Box>
