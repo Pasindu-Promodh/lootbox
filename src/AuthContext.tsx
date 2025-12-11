@@ -1,6 +1,6 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { supabase } from './supabase';
-import type { Session, User } from '@supabase/supabase-js';
+import React, { createContext, useContext, useEffect, useState } from "react";
+import { supabase } from "./supabase";
+import type { Session, User } from "@supabase/supabase-js";
 
 interface AuthContextType {
   session: Session | null;
@@ -12,7 +12,9 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -40,19 +42,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signIn = async () => {
     try {
       const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        // options: {
-        //   redirectTo: `https://pasindu-promodh.github.io/lootbox/`,
-        //   queryParams: {
-        //     access_type: 'offline',
-        //     prompt: 'consent',
-        //   },
-        // },
+        provider: "google",
+        options: {
+          redirectTo: `https://pasindu-promodh.github.io/lootbox/`,
+          // redirectTo: `http://localhost:5173`,
+          // queryParams: {
+          //   access_type: 'offline',
+          //   prompt: 'consent',
+          // },
+        },
       });
 
       if (error) throw error;
     } catch (error: any) {
-      console.error('Error signing in:', error.message);
+      console.error("Error signing in:", error.message);
       throw error;
     }
   };
@@ -61,9 +64,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
-      
     } catch (error: any) {
-      console.error('Error signing out:', error.message);
+      console.error("Error signing out:", error.message);
       throw error;
     }
   };
@@ -82,7 +84,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };
