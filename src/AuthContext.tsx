@@ -61,13 +61,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
+  // const signOut = async () => {
+  //   try {
+  //     const { error } = await supabase.auth.signOut();
+  //     if (error) throw error;
+  //   } catch (error: any) {
+  //     console.error("Error signing out:", error.message);
+  //     throw error;
+  //   }
+  // };
+
   const signOut = async () => {
     try {
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
-    } catch (error: any) {
-      console.error("Error signing out:", error.message);
-      throw error;
+      // Even if session is null, signOut() can be called safely
+      const { error } = await supabase.auth.signOut({ scope: "global" });
+
+      if (error) {
+        console.warn(
+          "Sign-out attempted without valid session. Ignoring.",
+          error.message
+        );
+      }
+
+      // Reset local state manually
+      setSession(null);
+      setUser(null);
+    } catch (err: any) {
+      console.error("Unexpected sign-out error:", err.message);
     }
   };
 
