@@ -68,14 +68,6 @@ const Profile: React.FC = () => {
   const [originalPhone2, setOriginalPhone2] = useState("");
 
   // --- Phone validation helper ---
-  // const validatePhone = (value: string) => {
-  //   if (value === "") return true; // Allow empty
-  //   const sriLankaPattern = /^(?:\+94|94|0)?7\d{8}$/; // 07XXXXXXXX / +947XXXXXXXX / 947XXXXXXXX
-  //   const international = /^[0-9]{7,15}$/;
-  //   return sriLankaPattern.test(value);
-  //   //  || international.test(value);
-  // };
-
   const validatePhone = (value: string) => {
     if (value === "") return true; // allow empty for phone2
     const pattern = /^07\d{8}$/; // strictly 07XXXXXXXX
@@ -196,34 +188,45 @@ const Profile: React.FC = () => {
             display: "flex",
             alignItems: "center",
             mb: 3,
-            justifyContent: "space-between",
+            // justifyContent: "space-between",
+            gap: 3,
+            flexDirection: { xs: "column", md: "row" },
           }}
         >
           {/* Left side: Avatar + Name + Email + Member Since */}
-          <Box sx={{ display: "flex", alignItems: "center", gap: 3 }}>
+          {/* <Box sx={{ display: "flex", alignItems: "center",justifyContent:"center", gap: 3,flexDirection: { xs: "column", md: "row" }, }}> */}
             <Avatar
               src={user_metadata?.avatar_url}
               alt={user_metadata?.full_name || email}
-              sx={{ width: 80, height: 80 }}
+              sx={{ width: 150, height: 150 }}
             >
               {user_metadata?.full_name?.charAt(0).toUpperCase() ||
                 email?.charAt(0).toUpperCase()}
             </Avatar>
-            <Box>
+            <Box sx={{ textAlign: { xs: "center", md: "left" }, width: { xs: "100%", md: "auto" } }}>
               <Typography variant="h5" fontWeight={600}>
                 {user_metadata?.full_name || "User"}
               </Typography>
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="body1" color="text.secondary" fontWeight={600}>
                 {email}
               </Typography>
               <Typography variant="body2" color="text.secondary">
                 Member Since: {new Date(created_at || "").toLocaleDateString()}
               </Typography>
+              <Typography variant="body2" color="text.secondary">
+              Last Sign-In: {new Date(last_sign_in_at || "").toLocaleString()}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Last Updated:{" "}
+              {profileUpdatedAt
+                ? new Date(profileUpdatedAt).toLocaleString()
+                : "N/A"}
+            </Typography>
             </Box>
           </Box>
 
           {/* Right side: Last Sign-In & Last Updated */}
-          <Box sx={{ textAlign: "right" }}>
+          {/* <Box sx={{ textAlign: "right" }}>
             <Typography variant="body2" color="text.secondary">
               Last Sign-In: {new Date(last_sign_in_at || "").toLocaleString()}
             </Typography>
@@ -233,8 +236,8 @@ const Profile: React.FC = () => {
                 ? new Date(profileUpdatedAt).toLocaleString()
                 : "N/A"}
             </Typography>
-          </Box>
-        </Box>
+          </Box> */}
+        {/* </Box> */}
 
         <Divider sx={{ my: 3 }} />
 

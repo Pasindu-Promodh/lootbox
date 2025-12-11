@@ -46,10 +46,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         options: {
           redirectTo: `https://pasindu-promodh.github.io/lootbox/`,
           // redirectTo: `http://localhost:5173`,
-          // queryParams: {
-          //   access_type: 'offline',
-          //   prompt: 'consent',
-          // },
+          queryParams: {
+            // access_type: 'offline',
+            // prompt: 'consent',
+            prompt: "select_account",
+          },
         },
       });
 
