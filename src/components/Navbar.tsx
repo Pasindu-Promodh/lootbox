@@ -23,8 +23,8 @@ import { useNavigate } from "react-router-dom";
 import { useTheme, useMediaQuery } from "@mui/material";
 
 import ProductSearch from "./ProductSearch";
-import CartDrawer from "./CartDrawer";
-import WishListDrawer from "./WishListDrawer";
+import CartDrawer from "./cart/CartDrawer";
+import WishListDrawer from "./wishlist/WishListDrawer";
 
 import { useCart } from "../context/CartContext";
 import { useWishList } from "../context/WishListContext";

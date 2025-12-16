@@ -108,26 +108,23 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
               >
                 Rs {p.price}
               </Typography>
-              {p.originalPrice && (
+              {p.on_sale && (
                 <Typography
                   variant="body2"
                   color="text.secondary"
                   sx={{ textDecoration: "line-through", fontSize: "0.75rem" }}
                 >
-                  Rs {p.originalPrice}
+                  Rs {p.price}
                 </Typography>
               )}
-              {p.originalPrice && (
+              {p.on_sale && (
                 <Typography
                   variant="body2"
                   color="error"
                   fontWeight={600}
                   sx={{ fontSize: "0.8rem" }}
                 >
-                  {Math.round(
-                    ((p.originalPrice - p.price) / p.originalPrice) * 100
-                  )}
-                  % OFF
+                  {Math.round(p.price * (1 - p.discount / 100))}% OFF
                 </Typography>
               )}
             </Box>
@@ -247,7 +244,7 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
                           >
                             Rs {p.price}
                           </Typography>
-                          {p.originalPrice && (
+                          {p.on_sale && (
                             <Typography
                               variant="body2"
                               color="text.secondary"
@@ -256,22 +253,17 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
                                 fontSize: "0.75rem",
                               }}
                             >
-                              Rs {p.originalPrice}
+                              Rs {p.price}
                             </Typography>
                           )}
-                          {p.originalPrice && (
+                          {p.on_sale && (
                             <Typography
                               variant="body2"
                               color="error"
                               fontWeight={600}
                               sx={{ fontSize: "0.8rem" }}
                             >
-                              {Math.round(
-                                ((p.originalPrice - p.price) /
-                                  p.originalPrice) *
-                                  100
-                              )}
-                              % OFF
+                              {Math.round(p.price * (1 - p.discount / 100))}% OFF
                             </Typography>
                           )}
                         </Box>

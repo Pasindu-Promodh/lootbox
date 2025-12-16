@@ -7,7 +7,7 @@ export interface CartItem {
   id: number;
   name: string;
   price: number;
-  originalPrice?: number;
+  discount: number;
   quantity: number;
   image?: string;
 }
@@ -17,6 +17,7 @@ interface CartContextType {
   addToCart: (id: number, quantity?: number) => Promise<void>;
   removeFromCart: (id: number) => void;
   updateQty: (id: number, qty: number) => void;
+  clearCart: () => void;
   total: number;
   shipping: number;
   totalCart: number;
@@ -60,7 +61,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
         id: product.id,
         name: product.name,
         price: product.price,
-        originalPrice: product.originalPrice,
+        discount: product.discount,
         image: product.images[0],
         quantity,
       };
@@ -107,7 +108,17 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
     showNotification("Quantity updated!", "info");
   };
 
-  const total = cart.reduce((sum, i) => sum + i.price * i.quantity, 0);
+  const clearCart = () => {
+    setCart([]);
+    setLastAddedCart(null);
+    //showNotification("Cart cleared!", "info");
+  };
+
+  const total = cart.reduce(
+    (sum, i) => sum + Math.round(i.price * (1 - i.discount / 100)) * i.quantity,
+    0
+  );
+
   const shipping = cart.length > 0 ? 350 : 0;
   const totalCart = cart.reduce((sum, i) => sum + i.quantity, 0);
 
@@ -118,6 +129,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
         addToCart,
         removeFromCart,
         updateQty,
+        clearCart,
         total,
         shipping,
         totalCart,

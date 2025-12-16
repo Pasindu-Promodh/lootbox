@@ -334,9 +334,6 @@
 //   );
 // }
 
-
-
-
 import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
@@ -463,18 +460,36 @@ export default function ProductPage() {
       </Button>
 
       {/* MAIN SECTION */}
-      <Box sx={{ display: "flex", flexDirection: { xs: "column", md: "row" }, gap: 4, mx: 2 }}>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: { xs: "column", md: "row" },
+          gap: 4,
+          mx: 2,
+        }}
+      >
         {/* IMAGE */}
         <Box sx={{ flex: 1 }}>
           <Box
-            sx={{ width: "100%", borderRadius: 2, overflow: "hidden", cursor: "zoom-in" }}
+            sx={{
+              width: "100%",
+              borderRadius: 2,
+              overflow: "hidden",
+              cursor: "zoom-in",
+            }}
             onClick={() => setViewerOpen(true)}
           >
             <CardMedia
               component="img"
               src={mainImage}
               alt={product.name}
-              sx={{ width: "100%", aspectRatio: "1/1", objectFit: "cover", transition: "transform .3s", "&:hover": { transform: "scale(1.03)" } }}
+              sx={{
+                width: "100%",
+                aspectRatio: "1/1",
+                objectFit: "cover",
+                transition: "transform .3s",
+                "&:hover": { transform: "scale(1.03)" },
+              }}
             />
           </Box>
 
@@ -483,9 +498,23 @@ export default function ProductPage() {
               <Box
                 key={img}
                 onClick={() => setMainImage(img)}
-                sx={{ width: 90, height: 90, borderRadius: 2, cursor: "pointer", overflow: "hidden", border: img === mainImage ? "2px solid #1976d2" : "2px solid transparent" }}
+                sx={{
+                  width: 90,
+                  height: 90,
+                  borderRadius: 2,
+                  cursor: "pointer",
+                  overflow: "hidden",
+                  border:
+                    img === mainImage
+                      ? "2px solid #1976d2"
+                      : "2px solid transparent",
+                }}
               >
-                <CardMedia component="img" src={img} sx={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                <CardMedia
+                  component="img"
+                  src={img}
+                  sx={{ width: "100%", height: "100%", objectFit: "cover" }}
+                />
               </Box>
             ))}
           </Box>
@@ -494,7 +523,10 @@ export default function ProductPage() {
         {/* DETAILS */}
         <Box sx={{ flex: 1 }}>
           <Typography variant="h4">{product.name}</Typography>
-          <Typography variant="subtitle1" sx={{ mb: 1, color: "text.secondary" }}>
+          <Typography
+            variant="subtitle1"
+            sx={{ mb: 1, color: "text.secondary" }}
+          >
             Category: {product.category}
           </Typography>
 
@@ -504,15 +536,18 @@ export default function ProductPage() {
 
           <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
             <Typography variant="h5" color="primary" fontWeight={700}>
-              Rs {product.price}
+              Rs {Math.round(product.price * (1 - product.discount / 100))}
             </Typography>
-            {product.originalPrice && product.originalPrice > product.price && (
+            {product.on_sale && (
               <>
-                <Typography variant="body1" sx={{ textDecoration: "line-through", opacity: 0.6 }}>
-                  Rs {product.originalPrice}
+                <Typography
+                  variant="body1"
+                  sx={{ textDecoration: "line-through", opacity: 0.6 }}
+                >
+                  Rs {product.price}
                 </Typography>
                 <Typography color="error" fontWeight={600}>
-                  Save {Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}%
+                  Save {product.discount}%
                 </Typography>
               </>
             )}
@@ -527,13 +562,31 @@ export default function ProductPage() {
             </Typography>
           </Box>
 
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5, mb: 3, p: 2, borderRadius: 2, backgroundColor: "#f7f7f7" }}>
-            <Typography variant="body2">✔ Cash on Delivery Available</Typography>
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 0.5,
+              mb: 3,
+              p: 2,
+              borderRadius: 2,
+              backgroundColor: "#f7f7f7",
+            }}
+          >
+            <Typography variant="body2">
+              ✔ Cash on Delivery Available
+            </Typography>
           </Box>
 
           <Box sx={{ display: "flex", gap: 2, mb: 2 }}>
-            <Button variant="contained" size="large" sx={{ flex: 1 }} disabled={!product.inStock} onClick={() => addToCart(product.id)}>
-              {product.inStock ? "Add to Cart" : "Out of Stock"}
+            <Button
+              variant="contained"
+              size="large"
+              sx={{ flex: 1 }}
+              disabled={!product.in_stock}
+              onClick={() => addToCart(product.id)}
+            >
+              {product.in_stock ? "Add to Cart" : "Out of Stock"}
             </Button>
             <Button
               variant={isInWishList ? "outlined" : "outlined"}
@@ -541,7 +594,9 @@ export default function ProductPage() {
               sx={{ flex: 1 }}
               color={isInWishList ? "error" : "primary"}
               onClick={() =>
-                isInWishList ? removeFromWishList(product.id) : addToWishList(product.id)
+                isInWishList
+                  ? removeFromWishList(product.id)
+                  : addToWishList(product.id)
               }
             >
               {isInWishList ? "Remove from Wishlist" : "Add to Wishlist"}

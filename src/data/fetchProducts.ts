@@ -47,7 +47,7 @@ export async function getProducts({
   featured?: boolean;
   orderBy?: { column: string; ascending?: boolean };
 } = {}): Promise<Product[]> {
-  let query = supabase.from("products").select("*").range(offset, offset + limit - 1);
+  let query = supabase.from("products_public").select("*").range(offset, offset + limit - 1);
 
   if (featured !== undefined) query = query.eq("featured", featured);
 
@@ -63,17 +63,16 @@ export async function getProducts({
   return data.map((p) => ({
     id: p.id,
     name: p.name,
+    description: p.description,
+    images: p.images || [],
     category: p.category,
     price: Number(p.price),
-    originalPrice: p.originalPrice ? Number(p.originalPrice) : undefined,
-    images: p.images || [],
-    inStock: p.inStock,
-    onSale: p.onSale,
-    description: p.description,
-    longDescription: p.longDescription,
+    discount: Number(p.discount),
     featured: p.featured,
-    soldCount: p.soldCount,
-    addedDate: p.addedDate,
+    in_stock: p.in_stock,
+    on_sale: p.on_sale,
+    sold_count: p.sold_count,
+    added_date: p.added_date,
   }));
 }
 
@@ -83,10 +82,10 @@ export async function getProductsByCategory(
   limit?: number
 ): Promise<Product[]> {
   let query = supabase
-    .from("products")
+    .from("products_public")
     .select("*")
     .eq("category", category)
-    .order("addedDate", { ascending: false });
+    .order("added_date", { ascending: false });
 
   if (limit) {
     query = query.limit(limit);
@@ -102,17 +101,16 @@ export async function getProductsByCategory(
   return data.map((p) => ({
     id: p.id,
     name: p.name,
+    description: p.description,
+    images: p.images || [],
     category: p.category,
     price: Number(p.price),
-    originalPrice: p.originalPrice ? Number(p.originalPrice) : undefined,
-    images: p.images || [],
-    inStock: p.inStock,
-    onSale: p.onSale,
-    description: p.description,
-    longDescription: p.longDescription,
+    discount: Number(p.discount),
     featured: p.featured,
-    soldCount: p.soldCount,
-    addedDate: p.addedDate,
+    in_stock: p.in_stock,
+    on_sale: p.on_sale,
+    sold_count: p.sold_count,
+    added_date: p.added_date,
   }));
 }
 
@@ -120,7 +118,7 @@ export async function getProductsByCategory(
 // Fetch a single product by ID
 export async function getProductById(id: string | undefined): Promise<Product | null> {
   const { data, error } = await supabase
-    .from("products")
+    .from("products_public")
     .select("*")
     .eq("id", id)
     .single();
@@ -133,16 +131,15 @@ export async function getProductById(id: string | undefined): Promise<Product | 
   return {
     id: data.id,
     name: data.name,
+    description: data.description,
+    images: data.images || [],
     category: data.category,
     price: Number(data.price),
-    originalPrice: data.originalPrice ? Number(data.originalPrice) : undefined,
-    images: data.images || [],
-    inStock: data.inStock,
-    onSale: data.onSale,
-    description: data.description,
-    longDescription: data.longDescription,
+    discount: Number(data.discount),
     featured: data.featured,
-    soldCount: data.soldCount,
-    addedDate: data.addedDate,
+    in_stock: data.in_stock,
+    on_sale: data.on_sale,
+    sold_count: data.sold_count,
+    added_date: data.added_date,
   };
 }

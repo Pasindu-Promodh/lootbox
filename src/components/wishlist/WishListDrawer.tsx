@@ -7,7 +7,7 @@ import {
   Divider,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import { useWishList } from "../context/WishListContext";
+import { useWishList } from "../../context/WishListContext";
 import WishListItem from "./WishListItem";
 
 interface WishListDrawerProps {

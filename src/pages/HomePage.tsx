@@ -39,14 +39,14 @@ const HomePage: React.FC = () => {
     // Fetch best sellers (sorted by soldCount)
     const best = await getProducts({
       limit: 6,
-      orderBy: { column: "soldCount" },
+      orderBy: { column: "sold_count" },
     });
     setBestSellers(best);
 
     // Fetch newest arrivals (sorted by addedDate)
     const newProds = await getProducts({
       limit: 6,
-      orderBy: { column: "addedDate" },
+      orderBy: { column: "added_date" },
     });
     setNewArrivals(newProds);
 

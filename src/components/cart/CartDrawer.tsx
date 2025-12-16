@@ -8,7 +8,7 @@ import {
   Button,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import { useCart } from "../context/CartContext";
+import { useCart } from "../../context/CartContext";
 import CartItem from "./CartItem";
 import { useNavigate } from "react-router-dom";
 
@@ -24,7 +24,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ open, onClose, onClickProduct }
 
   // Calculate original total (before discount)
   const originalTotal = cart.reduce(
-    (sum, item) => sum + (item.originalPrice ?? item.price) * item.quantity,
+    (sum, item) => sum + item.price * item.quantity,
     0
   );
 
@@ -89,8 +89,8 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ open, onClose, onClickProduct }
             variant="body2"
             sx={{ display: "flex", justifyContent: "space-between" }}
           >
-            <span>Original Price</span>
-            <span>Rs {originalTotal.toFixed(2)}</span>
+            <span>Subtotal</span>
+            <span>Rs {originalTotal}</span>
           </Typography>
 
           {/* Discount */}
@@ -105,7 +105,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ open, onClose, onClickProduct }
               }}
             >
               <span>Discount</span>
-              <span>- Rs {discountTotal.toFixed(2)}</span>
+              <span>- Rs {discountTotal}</span>
             </Typography>
           )}
 
@@ -119,8 +119,8 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ open, onClose, onClickProduct }
               mt: 1,
             }}
           >
-            <span>Subtotal</span>
-            <span>Rs {total.toFixed(2)}</span>
+            <span>Discounted Subtotal</span>
+            <span>Rs {total}</span>
           </Typography>
 
           {/* Shipping */}
@@ -133,7 +133,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ open, onClose, onClickProduct }
             }}
           >
             <span>Shipping</span>
-            <span>Rs {shipping.toFixed(2)}</span>
+            <span>Rs {shipping}</span>
           </Typography>
 
           <Divider sx={{ my: 1 }} />
@@ -148,7 +148,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ open, onClose, onClickProduct }
             }}
           >
             <span>Total</span>
-            <span>Rs {(total + shipping).toFixed(2)}</span>
+            <span>Rs {total + shipping}</span>
           </Typography>
 
           <Button

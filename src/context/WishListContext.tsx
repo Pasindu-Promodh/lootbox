@@ -7,7 +7,7 @@ export interface WishListItem {
   id: number;
   name: string;
   price: number;
-  originalPrice?: number;
+  discount: number;
   image?: string;
 }
 
@@ -55,7 +55,7 @@ export const WishListProvider: React.FC<{ children: React.ReactNode }> = ({
         id: product.id,
         name: product.name,
         price: product.price,
-        originalPrice: product.originalPrice,
+        discount: product.discount,
         image: product.images[0],
       };
 

@@ -3,19 +3,16 @@
 export type Product = {
   id: number;
   name: string;
-  category: string;
-  price: number; // current price
-  originalPrice?: number; // if present and > price, show discount
-  images: string[];
-  inStock: boolean;
-  onSale: boolean;
   description: string;
-  longDescription?: string;
-
-  // ⭐ NEW FIELDS
-  featured: boolean; // highlight on homepage
-  soldCount: number; // number of units sold
-  addedDate: string; // ISO date for sorting "new arrivals"
+  images: string[];
+  category: string;
+  price: number;
+  discount: number;
+  featured: boolean;
+  in_stock: boolean;
+  on_sale: boolean;
+  sold_count: number;
+  added_date: string;
 };
 
 export const ALL_PRODUCTS: Product[] = Array.from({ length: 50 }).map(
@@ -53,22 +50,25 @@ export const ALL_PRODUCTS: Product[] = Array.from({ length: 50 }).map(
 
     // ⭐ NEW FIELDS
     const featured = id % 6 === 0 || id % 9 === 0; //  roughly 20% featured
-    const soldCount = Math.floor(Math.random() * 500) + 10; // between 10–510 units
-    const addedDate = new Date(Date.now() - i * 86400000).toISOString(); // each item 1 day older
+    const sold_count = Math.floor(Math.random() * 500) + 10; // between 10–510 units
+    const added_date = new Date(Date.now() - i * 86400000).toISOString(); // each item 1 day older
+const discount = 0;
+const in_stock = true;
+const on_sale = true;
 
     return {
       id,
-      name,
-      category,
-      price,
-      originalPrice,
-      images,
-      inStock,
-      onSale,
-      description,
-      featured,
-      soldCount,
-      addedDate,
+  name,
+  description,
+  images,
+  category,
+  price,
+  discount,
+  featured,
+  in_stock,
+  on_sale,
+  sold_count,
+  added_date,
     };
   }
 );

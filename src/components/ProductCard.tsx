@@ -203,13 +203,6 @@
 
 // export default ProductCard;
 
-
-
-
-
-
-
-
 import React, { useState } from "react";
 import {
   Card,
@@ -259,7 +252,7 @@ const ProductCard: React.FC<Props> = ({
       }}
     >
       {/* SALE Badge */}
-      {product.onSale && (
+      {product.on_sale && (
         <Box
           sx={{
             position: "absolute",
@@ -287,7 +280,7 @@ const ProductCard: React.FC<Props> = ({
           position: "absolute",
           top: 12,
           left: 12,
-          bgcolor: product.inStock ? "success.main" : "grey.600",
+          bgcolor: product.in_stock ? "success.main" : "grey.600",
           color: "white",
           px: 1.2,
           py: 0.35,
@@ -297,13 +290,24 @@ const ProductCard: React.FC<Props> = ({
           zIndex: 12,
         }}
       >
-        {product.inStock ? "In Stock" : "Out of Stock"}
+        {product.in_stock ? "In Stock" : "Out of Stock"}
       </Box>
 
       {/* 1:1 Image */}
-      <Box sx={{ position: "relative", width: "100%", pt: "100%", bgcolor: "grey.100" }}>
+      <Box
+        sx={{
+          position: "relative",
+          width: "100%",
+          pt: "100%",
+          bgcolor: "grey.100",
+        }}
+      >
         {!loaded && (
-          <Skeleton variant="rectangular" animation="wave" sx={{ position: "absolute", inset: 0 }} />
+          <Skeleton
+            variant="rectangular"
+            animation="wave"
+            sx={{ position: "absolute", inset: 0 }}
+          />
         )}
         <CardMedia
           component="img"
@@ -341,10 +345,10 @@ const ProductCard: React.FC<Props> = ({
             fontWeight={500}
             sx={{ fontSize: fontSizes.price ?? "1.2rem" }}
           >
-            Rs {product.price.toFixed(2)}
+            Rs {Math.round(product.price * (1 - product.discount / 100))}
           </Typography>
 
-          {product.originalPrice && (
+          {product.on_sale && (
             <>
               <Typography
                 variant="body2"
@@ -354,7 +358,7 @@ const ProductCard: React.FC<Props> = ({
                   fontSize: fontSizes.originalPrice ?? "0.8rem",
                 }}
               >
-                Rs {product.originalPrice.toFixed(2)}
+                Rs {Math.round(product.price)}
               </Typography>
               <Typography
                 variant="body2"
@@ -362,10 +366,7 @@ const ProductCard: React.FC<Props> = ({
                 fontWeight={600}
                 sx={{ fontSize: "0.8rem" }}
               >
-                {Math.round(
-                  ((product.originalPrice - product.price) / product.originalPrice) * 100
-                )}
-                % OFF
+                {product.discount}% OFF
               </Typography>
             </>
           )}
@@ -377,10 +378,10 @@ const ProductCard: React.FC<Props> = ({
         variant="contained"
         color="primary"
         sx={{ borderRadius: 0, fontSize: fontSizes.button ?? "0.875rem" }}
-        disabled={!product.inStock}
+        disabled={!product.in_stock}
         onClick={(e) => onAddToCart(e, product.id)}
       >
-        {product.inStock ? "Add to Cart" : "Unavailable"}
+        {product.in_stock ? "Add to Cart" : "Unavailable"}
       </Button>
     </Card>
   );

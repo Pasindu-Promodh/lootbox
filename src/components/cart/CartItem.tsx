@@ -1,7 +1,10 @@
 import React from "react";
 import { Box, Typography, IconButton, Button, CardMedia } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { useCart, type CartItem as CartItemType } from "../context/CartContext";
+import {
+  useCart,
+  type CartItem as CartItemType,
+} from "../../context/CartContext";
 
 interface Props {
   item: CartItemType;
@@ -59,29 +62,26 @@ const CartItem: React.FC<Props> = ({ item, onClose, onClickProduct }) => {
             fontWeight={500}
             sx={{ fontSize: "1rem", color: "text.primary" }}
           >
-            Rs {item.price}
+            Rs {Math.round(item.price * (1 - item.discount / 100))}
           </Typography>
 
-          {item.originalPrice && (
+          {item.discount != 0 && (
             <Typography
               variant="body2"
               color="text.secondary"
               sx={{ textDecoration: "line-through", fontSize: "0.75rem" }}
             >
-              Rs {item.originalPrice}
+              Rs {item.price}
             </Typography>
           )}
-          {item.originalPrice && (
+          {item.discount != 0 && (
             <Typography
               variant="body2"
               color="error"
               fontWeight={600}
               sx={{ fontSize: "0.8rem" }}
             >
-              {Math.round(
-                ((item.originalPrice - item.price) / item.originalPrice) * 100
-              )}
-              % OFF
+              {item.discount}% OFF
             </Typography>
           )}
         </Box>
@@ -122,7 +122,8 @@ const CartItem: React.FC<Props> = ({ item, onClose, onClickProduct }) => {
             fontWeight={500}
             sx={{ fontSize: "1rem", color: "primary.main" }}
           >
-            Rs {item.price * item.quantity}
+            Rs{" "}
+            {Math.round(item.price * (1 - item.discount / 100)) * item.quantity}
           </Typography>
         </Box>
       </Box>

@@ -17,12 +17,14 @@ import {
 import { useCart } from "../context/CartContext";
 import { supabase } from "../supabase";
 import type { User } from "@supabase/supabase-js";
-import CartItem from "../components/CartItem";
+import CartItem from "../components/cart/CartItem";
 import { useNavigate } from "react-router-dom";
+import { useNotification } from "../context/NotificationContext";
 
 const CheckoutPage: React.FC = () => {
   const navigate = useNavigate();
-  const { cart, total, shipping } = useCart();
+  const { cart, total, shipping, clearCart } = useCart();
+  const { showNotification } = useNotification();
 
   const districts = [
     "Colombo",
@@ -79,7 +81,7 @@ const CheckoutPage: React.FC = () => {
 
   // ---- PRICE CALCULATIONS ---- //
   const originalTotal = cart.reduce(
-    (sum, item) => sum + (item.originalPrice ?? item.price) * item.quantity,
+    (sum, item) => sum + item.price * item.quantity,
     0
   );
 
@@ -174,6 +176,45 @@ const CheckoutPage: React.FC = () => {
   };
 
   const isGuest = !user;
+
+  const placeOrder = async () => {
+    try {
+      const res = await fetch(
+        "https://fdlwfmzzlshcjhsoqftd.supabase.co/functions/v1/create-order",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+          },
+          body: JSON.stringify({
+            user_id: user?.id ?? null,
+            items: cart.map((i) => ({
+              product_id: i.id,
+              qty: i.quantity,
+            })),
+            customer: {
+              name: form.fullName,
+              address: form.address,
+              district: form.district,
+              phone1: form.phone1,
+              phone2: form.phone2,
+            },
+            payment_method: paymentMethod,
+          }),
+        }
+      );
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Unknown error");
+      // alert("Order successful!");
+      showNotification(`Order successful!`, "success");
+      navigate("/");
+      clearCart();
+    } catch (err) {
+      //alert(`Order failed: ${(err as Error).message}`);
+      showNotification(`Order failed: ${(err as Error).message}`, "error");
+    }
+  };
 
   return (
     <Box sx={{ maxWidth: 950, mx: "auto", p: 2 }}>
@@ -326,25 +367,23 @@ const CheckoutPage: React.FC = () => {
             {/* PRICE BREAKDOWN */}
             <Box>
               <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-                <Typography>Original Price</Typography>
-                <Typography>Rs {originalTotal.toFixed(2)}</Typography>
+                <Typography>Subtotal</Typography>
+                <Typography>Rs {originalTotal}</Typography>
               </Box>
 
               <Box sx={{ display: "flex", justifyContent: "space-between" }}>
                 <Typography>Discount</Typography>
-                <Typography color="success.main">
-                  - Rs {discountTotal.toFixed(2)}
-                </Typography>
+                <Typography color="error.main">- Rs {discountTotal}</Typography>
               </Box>
 
               <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-                <Typography>Subtotal</Typography>
-                <Typography>Rs {subtotal.toFixed(2)}</Typography>
+                <Typography>Discounted Subtotal</Typography>
+                <Typography>Rs {subtotal}</Typography>
               </Box>
 
               <Box sx={{ display: "flex", justifyContent: "space-between" }}>
                 <Typography>Shipping</Typography>
-                <Typography>Rs {shipping.toFixed(2)}</Typography>
+                <Typography>Rs {shipping}</Typography>
               </Box>
 
               <Divider sx={{ my: 2 }} />
@@ -352,7 +391,7 @@ const CheckoutPage: React.FC = () => {
               <Box sx={{ display: "flex", justifyContent: "space-between" }}>
                 <Typography fontWeight={700}>Total</Typography>
                 <Typography fontWeight={700} color="primary">
-                  Rs {finalTotal.toFixed(2)}
+                  Rs {finalTotal}
                 </Typography>
               </Box>
             </Box>
@@ -409,6 +448,7 @@ const CheckoutPage: React.FC = () => {
               size="large"
               sx={{ mt: 2 }}
               disabled={!isFormValid()}
+              onClick={placeOrder}
             >
               {/* {paymentMethod === "cod" &&
                 `Place Order (Pay Rs ${amountToPayLater.toFixed(

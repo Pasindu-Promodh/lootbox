@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef } from "react";
 import { Box } from "@mui/material";
 import ProductCard from "./ProductCard";
 import type { Product } from "../data/products";
@@ -19,19 +19,19 @@ const ProductSlider: React.FC<Props> = ({
 }) => {
   const sliderRef = useRef<HTMLDivElement | null>(null);
 
-  useEffect(() => {
-    const slider = sliderRef.current;
-    if (!slider) return;
+  // useEffect(() => {
+  //   const slider = sliderRef.current;
+  //   if (!slider) return;
 
-    const handleWheel = (e: WheelEvent) => {
-      e.preventDefault(); // now works
-      slider.scrollLeft += e.deltaY;
-    };
+  //   const handleWheel = (e: WheelEvent) => {
+  //     e.preventDefault(); // now works
+  //     slider.scrollLeft += e.deltaY;
+  //   };
 
-    slider.addEventListener("wheel", handleWheel, { passive: false });
+  //   slider.addEventListener("wheel", handleWheel, { passive: false });
 
-    return () => slider.removeEventListener("wheel", handleWheel);
-  }, []);
+  //   return () => slider.removeEventListener("wheel", handleWheel);
+  // }, []);
 
   return (
     <Box

@@ -82,8 +82,8 @@ const ShopPage: React.FC = () => {
   // Filter & sort products
   const filteredSorted = useMemo(() => {
     let list = allProducts.filter((p) => {
-      const matchesStock = onlyInStock ? p.inStock : true;
-      const matchesSale = onlyOnSale ? p.onSale : true;
+      const matchesStock = onlyInStock ? p.in_stock : true;
+      const matchesSale = onlyOnSale ? p.on_sale : true;
       return matchesStock && matchesSale;
     });
 
