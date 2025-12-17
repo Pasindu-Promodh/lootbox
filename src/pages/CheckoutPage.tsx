@@ -368,22 +368,24 @@ const CheckoutPage: React.FC = () => {
             <Box>
               <Box sx={{ display: "flex", justifyContent: "space-between" }}>
                 <Typography>Subtotal</Typography>
-                <Typography>Rs {originalTotal}</Typography>
+                <Typography>Rs {originalTotal.toLocaleString()}</Typography>
               </Box>
 
               <Box sx={{ display: "flex", justifyContent: "space-between" }}>
                 <Typography>Discount</Typography>
-                <Typography color="error.main">- Rs {discountTotal}</Typography>
+                <Typography color="error.main">
+                  - Rs {discountTotal.toLocaleString()}
+                </Typography>
               </Box>
 
               <Box sx={{ display: "flex", justifyContent: "space-between" }}>
                 <Typography>Discounted Subtotal</Typography>
-                <Typography>Rs {subtotal}</Typography>
+                <Typography>Rs {subtotal.toLocaleString()}</Typography>
               </Box>
 
               <Box sx={{ display: "flex", justifyContent: "space-between" }}>
                 <Typography>Shipping</Typography>
-                <Typography>Rs {shipping}</Typography>
+                <Typography>Rs {shipping.toLocaleString()}</Typography>
               </Box>
 
               <Divider sx={{ my: 2 }} />
@@ -391,7 +393,7 @@ const CheckoutPage: React.FC = () => {
               <Box sx={{ display: "flex", justifyContent: "space-between" }}>
                 <Typography fontWeight={700}>Total</Typography>
                 <Typography fontWeight={700} color="primary">
-                  Rs {finalTotal}
+                  Rs {finalTotal.toLocaleString()}
                 </Typography>
               </Box>
             </Box>
@@ -406,19 +408,17 @@ const CheckoutPage: React.FC = () => {
                 {
                   key: "full",
                   title: "Pay Full Amount Online  (5% Discount)",
-                  description: `Pay Rs ${fullPayAmount} now.`,
+                  description: `Pay Rs ${fullPayAmount.toLocaleString()} now.`,
                 },
                 {
                   key: "partial",
                   title: "Pay Only Shipping (2% Discount)",
-                  description: `Pay Rs ${shipping} now. Remaining: Rs ${partialPayAmount}.`,
+                  description: `Pay Rs ${shipping.toLocaleString()} now. Remaining: Rs ${partialPayAmount.toLocaleString()}.`,
                 },
                 {
                   key: "cod",
                   title: "Cash on Delivery",
-                  description: `Pay Rs ${finalTotal.toFixed(
-                    2
-                  )} when items arrive.`,
+                  description: `Pay Rs ${finalTotal.toLocaleString()} when items arrive.`,
                 },
               ].map((pm) => (
                 <Card

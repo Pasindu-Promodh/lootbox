@@ -1,4 +1,3 @@
-// components/orders/OrderCard.tsx
 import {
   Box,
   Card,
@@ -6,12 +5,16 @@ import {
   Chip,
   Divider,
   Typography,
-  Button,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import type { Order } from "../../pages/MyOrders";
 import OrderItems from "./OrderItems";
 import OrderPriceBreakdown from "./OrderPriceBreakdown";
+import type { Order, OrderStatus } from "../../types/order";
+import OrderDetails from "./OrderDetails";
+import OrderStatusLogView from "./OrderStatusLog";
+import { Accordion, AccordionSummary, AccordionDetails } from "@mui/material";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import { getLatestOrderStatus } from "../../utils/orderStatus";
 
 interface Props {
   order: Order;
@@ -28,43 +31,78 @@ const OrderCard: React.FC<Props> = ({
 }) => {
   const navigate = useNavigate();
 
-  const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
-      case "pending":
-        return "warning";
-      case "processing":
-        return "info";
-      case "shipped":
-        return "primary";
-      case "delivered":
-        return "success";
-      case "cancelled":
-        return "error";
-      default:
-        return "default";
+  const latestStatus = getLatestOrderStatus(order);
+
+  const statusStyles: Record<
+    OrderStatus,
+    {
+      chipColor:
+        | "warning"
+        | "info"
+        | "primary"
+        | "success"
+        | "error"
+        | "default";
+      borderColor: string;
     }
+  > = {
+    pending: { chipColor: "warning", borderColor: "#FFB300" },
+    processing: { chipColor: "info", borderColor: "#2196F3" },
+    shipped: { chipColor: "primary", borderColor: "#1976D2" },
+    delivered: { chipColor: "success", borderColor: "#4CAF50" },
+    cancelled: { chipColor: "error", borderColor: "#F44336" },
   };
 
+  const getStatusStyle = (status: OrderStatus) => {
+    return (
+      statusStyles[status] || { chipColor: "default", borderColor: "#BDBDBD" }
+    );
+  };
+
+  const latestStatusStyle = getStatusStyle(latestStatus);
+
   return (
-    <Card sx={{ mb: 3, borderRadius: 3 }}>
+    <Card
+      sx={{
+        mb: 3,
+        borderRadius: 3,
+        border: 2,
+        borderColor: latestStatusStyle.borderColor,
+        transition: "0.3s",
+        "&:hover": { boxShadow: 6, transform: "translateY(-2px)" },
+      }}
+    >
       <CardContent>
-        {/* BASIC INFO */}
-        <Box display="flex" justifyContent="space-between">
+        {/* Header */}
+        <Box
+          display="flex"
+          justifyContent="space-between"
+          alignItems="center"
+          mb={1}
+        >
           <Box>
-            <Typography fontWeight={600}>
+            <Typography fontWeight={700} variant="subtitle1">
               Order #{order.id.slice(0, 8).toUpperCase()}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              {new Date(order.created_at).toLocaleDateString()}
+              {new Date(order.created_at).toLocaleString()}
             </Typography>
           </Box>
 
           <Box textAlign="right">
             <Chip
-              label={order.status.toUpperCase()}
-              color={getStatusColor(order.status) as any}
+              label={latestStatus.toUpperCase()}
+              sx={{
+                fontWeight: 600,
+                px: 2,
+                py: 0.5,
+                borderRadius: 2,
+                textTransform: "uppercase",
+                backgroundColor: latestStatusStyle.borderColor,
+                color: "#fff",
+              }}
             />
-            <Typography fontWeight={700} sx={{mt:1}}>
+            <Typography fontWeight={700} variant="h6" sx={{ mt: 0.5 }}>
               Rs {order.total.toLocaleString()}
             </Typography>
           </Box>
@@ -72,12 +110,29 @@ const OrderCard: React.FC<Props> = ({
 
         <Divider sx={{ my: 2 }} />
 
-        <Button size="small" onClick={onToggle}>
-          {expanded ? "Hide details" : "View details"}
-        </Button>
+        {/* Accordion for details */}
+        <Accordion
+          expanded={expanded}
+          onChange={onToggle}
+          disableGutters
+          elevation={0}
+          sx={{
+            backgroundColor: "grey.50",
+            borderRadius: 2,
+            "&:before": { display: "none" },
+          }}
+        >
+          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+            <Typography fontWeight={600} color="text.primary">
+              Order Details
+            </Typography>
+          </AccordionSummary>
 
-        {expanded && (
-          <>
+          <AccordionDetails sx={{ px: 2, py: 1 }}>
+            <Divider sx={{ mb: 2 }} />
+            <OrderDetails order={order} />
+            <Divider sx={{ my: 2 }} />
+            <OrderStatusLogView log={order.status_log} />
             <Divider sx={{ my: 2 }} />
             <OrderItems
               items={order.items}
@@ -86,8 +141,8 @@ const OrderCard: React.FC<Props> = ({
             />
             <Divider sx={{ my: 2 }} />
             <OrderPriceBreakdown order={order} />
-          </>
-        )}
+          </AccordionDetails>
+        </Accordion>
       </CardContent>
     </Card>
   );

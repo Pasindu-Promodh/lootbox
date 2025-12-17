@@ -1,5 +1,5 @@
 import { Box, Typography } from "@mui/material";
-import type { OrderItem } from "../../pages/MyOrders";
+import type { OrderItem } from "../../types/order";
 
 interface Props {
   items: OrderItem[];
@@ -9,10 +9,11 @@ interface Props {
 
 const OrderItems: React.FC<Props> = ({ items, productMap, onClickProduct }) => (
   <>
-    {items.map((item) => {
+    {items.map((item, i) => {
       const product = productMap[item.product_id];
       return (
         <Box
+          key={i}
           sx={{
             display: "flex",
             alignItems: "center",
@@ -45,7 +46,7 @@ const OrderItems: React.FC<Props> = ({ items, productMap, onClickProduct }) => (
               {product?.name ?? "Product"}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Qty: {item.qty} × Rs {item.price}
+              Qty: {item.qty} × Rs {item.price.toLocaleString()}
             </Typography>
           </Box>
 

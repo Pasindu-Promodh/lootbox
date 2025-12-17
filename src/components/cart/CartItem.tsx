@@ -62,7 +62,7 @@ const CartItem: React.FC<Props> = ({ item, onClose, onClickProduct }) => {
             fontWeight={500}
             sx={{ fontSize: "1rem", color: "text.primary" }}
           >
-            Rs {Math.round(item.price * (1 - item.discount / 100))}
+            Rs {Math.round(item.price * (1 - item.discount / 100)).toLocaleString()}
           </Typography>
 
           {item.discount != 0 && (
@@ -71,7 +71,7 @@ const CartItem: React.FC<Props> = ({ item, onClose, onClickProduct }) => {
               color="text.secondary"
               sx={{ textDecoration: "line-through", fontSize: "0.75rem" }}
             >
-              Rs {item.price}
+              Rs {item.price.toLocaleString()}
             </Typography>
           )}
           {item.discount != 0 && (
@@ -123,7 +123,7 @@ const CartItem: React.FC<Props> = ({ item, onClose, onClickProduct }) => {
             sx={{ fontSize: "1rem", color: "primary.main" }}
           >
             Rs{" "}
-            {Math.round(item.price * (1 - item.discount / 100)) * item.quantity}
+            {(Math.round(item.price * (1 - item.discount / 100)) * item.quantity).toLocaleString()}
           </Typography>
         </Box>
       </Box>

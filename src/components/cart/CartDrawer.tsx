@@ -90,7 +90,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ open, onClose, onClickProduct }
             sx={{ display: "flex", justifyContent: "space-between" }}
           >
             <span>Subtotal</span>
-            <span>Rs {originalTotal}</span>
+            <span>Rs {originalTotal.toLocaleString()}</span>
           </Typography>
 
           {/* Discount */}
@@ -105,7 +105,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ open, onClose, onClickProduct }
               }}
             >
               <span>Discount</span>
-              <span>- Rs {discountTotal}</span>
+              <span>- Rs {discountTotal.toLocaleString()}</span>
             </Typography>
           )}
 
@@ -120,7 +120,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ open, onClose, onClickProduct }
             }}
           >
             <span>Discounted Subtotal</span>
-            <span>Rs {total}</span>
+            <span>Rs {total.toLocaleString()}</span>
           </Typography>
 
           {/* Shipping */}
@@ -133,7 +133,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ open, onClose, onClickProduct }
             }}
           >
             <span>Shipping</span>
-            <span>Rs {shipping}</span>
+            <span>Rs {shipping.toLocaleString()}</span>
           </Typography>
 
           <Divider sx={{ my: 1 }} />
@@ -148,7 +148,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ open, onClose, onClickProduct }
             }}
           >
             <span>Total</span>
-            <span>Rs {total + shipping}</span>
+            <span>Rs {(total + shipping).toLocaleString()}</span>
           </Typography>
 
           <Button

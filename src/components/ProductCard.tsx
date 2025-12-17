@@ -345,7 +345,7 @@ const ProductCard: React.FC<Props> = ({
             fontWeight={500}
             sx={{ fontSize: fontSizes.price ?? "1.2rem" }}
           >
-            Rs {Math.round(product.price * (1 - product.discount / 100))}
+            Rs {Math.round(product.price * (1 - product.discount / 100)).toLocaleString()}
           </Typography>
 
           {product.on_sale && (
@@ -358,7 +358,7 @@ const ProductCard: React.FC<Props> = ({
                   fontSize: fontSizes.originalPrice ?? "0.8rem",
                 }}
               >
-                Rs {Math.round(product.price)}
+                Rs {Math.round(product.price).toLocaleString()}
               </Typography>
               <Typography
                 variant="body2"
