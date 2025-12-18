@@ -5,6 +5,8 @@ import {
   Typography,
   IconButton,
   Divider,
+  useTheme,
+  useMediaQuery,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { useWishList } from "../../context/WishListContext";
@@ -13,18 +15,29 @@ import WishListItem from "./WishListItem";
 interface WishListDrawerProps {
   open: boolean;
   onClose: () => void;
-  onClickProduct: (id: number) => void;
+  onClickProduct: (id: string) => void;
 }
 
-const WishListDrawer: React.FC<WishListDrawerProps> = ({ open, onClose, onClickProduct }) => {
+const WishListDrawer: React.FC<WishListDrawerProps> = ({
+  open,
+  onClose,
+  onClickProduct,
+}) => {
   const { wishList } = useWishList();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   return (
     <Drawer
       anchor="right"
       open={open}
       onClose={onClose}
-      PaperProps={{ sx: { width: 400 } }}
+      PaperProps={{
+        sx: {
+          width: isMobile ? "100vw" : 400,
+          maxWidth: "100vw",
+        },
+      }}
     >
       {/* Header */}
       <Box
@@ -56,13 +69,18 @@ const WishListDrawer: React.FC<WishListDrawerProps> = ({ open, onClose, onClickP
             Your wishlist is empty
           </Typography>
         ) : (
-          wishList.map((item) => <WishListItem key={item.id} item={item} onClose={onClose} onClickProduct={onClickProduct} />)
+          wishList.map((item) => (
+            <WishListItem
+              key={item.id}
+              item={item}
+              onClose={onClose}
+              onClickProduct={onClickProduct}
+            />
+          ))
         )}
       </Box>
 
       <Divider />
-
-      
     </Drawer>
   );
 };

@@ -1,4 +1,3 @@
-// ProductSearch.tsx
 import React, { useState, useRef } from "react";
 import {
   Box,
@@ -9,14 +8,16 @@ import {
   CardContent,
   Typography,
   ClickAwayListener,
+  CircularProgress,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import { ALL_PRODUCTS } from "../data/products";
+import type { Product } from "../data/products";
+import { searchProducts } from "../data/fetchProducts";
 
 interface ProductSearchProps {
   isMobile?: boolean;
-  width?: number; // desktop width
-  openFullScreen?: boolean; // mobile full-screen overlay
+  width?: number;
+  openFullScreen?: boolean;
   onCloseFullScreen?: () => void;
 }
 
@@ -27,23 +28,59 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
   onCloseFullScreen,
 }) => {
   const navigate = useNavigate();
+
   const [search, setSearch] = useState("");
+  const [results, setResults] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(false);
   const [openDropdown, setOpenDropdown] = useState(false);
 
   const searchRef = useRef<HTMLDivElement | null>(null);
 
-  const filteredProducts = ALL_PRODUCTS.filter((p) =>
-    p.name.toLowerCase().includes(search.toLowerCase())
-  );
-
-  const handleSelectProduct = (id: number) => {
+  const handleSelectProduct = (id: string) => {
     navigate(`/product/${id}`);
     setSearch("");
+    setResults([]);
     setOpenDropdown(false);
     onCloseFullScreen?.();
   };
 
-  const renderDropdown = () => (
+  const debounce = (func: (...args: any[]) => void, delay: number) => {
+    let timer: number;
+    return (...args: any[]) => {
+      clearTimeout(timer);
+      timer = window.setTimeout(() => func(...args), delay);
+    };
+  };
+
+  const debouncedSearch = useRef(
+    debounce(async (value: string) => {
+      if (!value.trim()) {
+        setResults([]);
+        setLoading(false);
+        return;
+      }
+
+      setLoading(true);
+      try {
+        const data = await searchProducts(value, 8); // your API function
+        setResults(data);
+        setOpenDropdown(true);
+      } catch (err) {
+        console.error(err);
+        setResults([]);
+      } finally {
+        setLoading(false);
+      }
+    }, 500)
+  ).current;
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearch(value);
+    debouncedSearch(value); // trigger debounced API search
+  };
+
+  const renderResults = () => (
     <Paper
       sx={{
         position: "absolute",
@@ -55,16 +92,22 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
         overflowY: "auto",
         mt: 0.5,
         p: 1,
-        width: isMobile ? "90%" : width,
-        margin: isMobile ? "0 auto" : undefined,
+        width: isMobile ? "100%" : width,
       }}
     >
-      {filteredProducts.length === 0 && (
+      {loading && (
+        <Box sx={{ display: "flex", justifyContent: "center", py: 2 }}>
+          <CircularProgress size={22} />
+        </Box>
+      )}
+
+      {!loading && results.length === 0 && (
         <Typography variant="body2" sx={{ p: 1, color: "text.secondary" }}>
           No results found
         </Typography>
       )}
-      {filteredProducts.map((p) => (
+
+      {results.map((p) => (
         <Card
           key={p.id}
           onClick={() => handleSelectProduct(p.id)}
@@ -77,7 +120,6 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
             "&:hover": { boxShadow: 3 },
           }}
         >
-          {/* Image */}
           <CardMedia
             component="img"
             image={p.images?.[0]}
@@ -85,7 +127,6 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
             sx={{ width: 80, height: 80, objectFit: "cover", borderRadius: 1 }}
           />
 
-          {/* Info */}
           <CardContent sx={{ flexGrow: 1, py: 0.5, px: 1 }}>
             <Typography
               variant="body2"
@@ -95,36 +136,26 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
             >
               {p.name}
             </Typography>
-            {/* <Typography variant="caption" color="text.secondary" noWrap>
-              {p.category}
-            </Typography> */}
+
             <Box
               sx={{ display: "flex", gap: 1, alignItems: "center", mt: 0.3 }}
             >
               <Typography
                 variant="body2"
-                fontWeight={500}
-                sx={{ fontSize: "1.1rem", color: "primary.main" }}
+                fontWeight={600}
+                sx={{ fontSize: "1rem", color: "primary.main" }}
               >
                 Rs {p.price}
               </Typography>
-              {p.on_sale && (
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                  sx={{ textDecoration: "line-through", fontSize: "0.75rem" }}
-                >
-                  Rs {p.price}
-                </Typography>
-              )}
-              {p.on_sale && (
+
+              {p.discount > 0 && (
                 <Typography
                   variant="body2"
                   color="error"
                   fontWeight={600}
-                  sx={{ fontSize: "0.8rem" }}
+                  sx={{ fontSize: "0.75rem" }}
                 >
-                  {Math.round(p.price * (1 - p.discount / 100))}% OFF
+                  {p.discount}% OFF
                 </Typography>
               )}
             </Box>
@@ -133,6 +164,8 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
       ))}
     </Paper>
   );
+
+  // 📱 MOBILE FULLSCREEN SEARCH
 
   if (isMobile && openFullScreen) {
     return (
@@ -158,10 +191,11 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
               autoFocus
               placeholder="Search products..."
               value={search}
-              onChange={(e) => {
-                setSearch(e.target.value);
-                setOpenDropdown(true);
-              }}
+              // onChange={(e) => {
+              //   setSearch(e.target.value);
+              //   setOpenDropdown(true);
+              // }}
+              onChange={handleChange}
               sx={{
                 width: "100%",
                 backgroundColor: "#fff",
@@ -178,99 +212,105 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
                   left: 0,
                   right: 0,
                   zIndex: 11,
-                  maxHeight: 300,
+                  maxHeight: 500,
                   overflowY: "auto",
                   mt: 0.5,
                   p: 1,
                   width: isMobile ? "100%" : width,
                 }}
               >
-                {filteredProducts.length === 0 ? (
+                {loading && (
+                  <Box
+                    sx={{ display: "flex", justifyContent: "center", py: 2 }}
+                  >
+                    <CircularProgress size={22} />
+                  </Box>
+                )}
+                {!loading && results.length === 0 && (
                   <Typography
                     variant="body2"
                     sx={{ p: 1, color: "text.secondary" }}
                   >
                     No results found
                   </Typography>
-                ) : (
-                  filteredProducts.map((p) => (
-                    <Card
-                      key={p.id}
-                      onClick={() => handleSelectProduct(p.id)}
+                )}
+                {results.map((p) => (
+                  <Card
+                    key={p.id}
+                    onClick={() => handleSelectProduct(p.id)}
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      mb: 1,
+                      cursor: "pointer",
+                      boxShadow: 1,
+                      "&:hover": { boxShadow: 3 },
+                    }}
+                  >
+                    <CardMedia
+                      component="img"
+                      image={p.images?.[0]}
+                      alt={p.name}
                       sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        mb: 1,
-                        cursor: "pointer",
-                        boxShadow: 1,
-                        "&:hover": { boxShadow: 3 },
+                        width: 80,
+                        height: 80,
+                        objectFit: "cover",
+                        borderRadius: 1,
                       }}
-                    >
-                      <CardMedia
-                        component="img"
-                        image={p.images?.[0]}
-                        alt={p.name}
+                    />
+                    <CardContent sx={{ flexGrow: 1, py: 0.5, px: 1 }}>
+                      <Typography
+                        variant="body2"
+                        fontWeight={500}
+                        noWrap
+                        sx={{ fontSize: "0.9rem" }}
+                      >
+                        {p.name}
+                      </Typography>
+                      {/* <Typography variant="caption" color="text.secondary">
+                          {p.category}
+                        </Typography> */}
+                      <Box
                         sx={{
-                          width: 80,
-                          height: 80,
-                          objectFit: "cover",
-                          borderRadius: 1,
+                          display: "flex",
+                          gap: 1,
+                          alignItems: "center",
+                          mt: 0.3,
                         }}
-                      />
-                      <CardContent sx={{ flexGrow: 1, py: 0.5, px: 1 }}>
+                      >
                         <Typography
                           variant="body2"
                           fontWeight={500}
-                          noWrap
-                          sx={{ fontSize: "0.9rem" }}
+                          sx={{ fontSize: "1.1rem", color: "primary.main" }}
                         >
-                          {p.name}
+                          Rs {p.price}
                         </Typography>
-                        {/* <Typography variant="caption" color="text.secondary">
-                          {p.category}
-                        </Typography> */}
-                        <Box
-                          sx={{
-                            display: "flex",
-                            gap: 1,
-                            alignItems: "center",
-                            mt: 0.3,
-                          }}
-                        >
+                        {p.on_sale && (
                           <Typography
                             variant="body2"
-                            fontWeight={500}
-                            sx={{ fontSize: "1.1rem", color: "primary.main" }}
+                            color="text.secondary"
+                            sx={{
+                              textDecoration: "line-through",
+                              fontSize: "0.75rem",
+                            }}
                           >
                             Rs {p.price}
                           </Typography>
-                          {p.on_sale && (
-                            <Typography
-                              variant="body2"
-                              color="text.secondary"
-                              sx={{
-                                textDecoration: "line-through",
-                                fontSize: "0.75rem",
-                              }}
-                            >
-                              Rs {p.price}
-                            </Typography>
-                          )}
-                          {p.on_sale && (
-                            <Typography
-                              variant="body2"
-                              color="error"
-                              fontWeight={600}
-                              sx={{ fontSize: "0.8rem" }}
-                            >
-                              {Math.round(p.price * (1 - p.discount / 100))}% OFF
-                            </Typography>
-                          )}
-                        </Box>
-                      </CardContent>
-                    </Card>
-                  ))
-                )}
+                        )}
+                        {p.on_sale && (
+                          <Typography
+                            variant="body2"
+                            color="error"
+                            fontWeight={600}
+                            sx={{ fontSize: "0.8rem" }}
+                          >
+                            {Math.round(p.price * (1 - p.discount / 100))}% OFF
+                          </Typography>
+                        )}
+                      </Box>
+                    </CardContent>
+                  </Card>
+                ))}
               </Paper>
             )}
           </Box>
@@ -279,29 +319,25 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
     );
   }
 
-  // Desktop / normal
+  // 🖥 DESKTOP SEARCH
   return (
     <ClickAwayListener onClickAway={() => setOpenDropdown(false)}>
-      <Box sx={{ position: "relative", width: width }} ref={searchRef}>
+      <Box sx={{ position: "relative", width }} ref={searchRef}>
         <InputBase
           placeholder="Search products..."
           value={search}
-          onChange={(e) => {
-            setSearch(e.target.value);
-            setOpenDropdown(true);
-          }}
+          onChange={handleChange}
           sx={{
             width: "100%",
-            backgroundColor: isMobile
-              ? "rgba(0,0,0,0.05)"
-              : "rgba(255,255,255,0.15)",
+            backgroundColor: "rgba(255,255,255,0.15)",
             borderRadius: 1,
             px: 1,
             py: 0.5,
-            color: isMobile ? "inherit" : "#fff",
+            color: "#fff",
           }}
         />
-        {openDropdown && search && renderDropdown()}
+
+        {openDropdown && search && renderResults()}
       </Box>
     </ClickAwayListener>
   );

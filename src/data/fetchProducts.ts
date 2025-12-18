@@ -143,3 +143,40 @@ export async function getProductById(id: string | undefined): Promise<Product | 
     added_date: data.added_date,
   };
 }
+
+
+export async function searchProducts(
+  keyword: string,
+  limit = 12
+): Promise<Product[]> {
+  if (!keyword.trim()) return [];
+
+  const { data, error } = await supabase
+    .from("products_public")
+    .select("*")
+    .or(
+      `name.ilike.%${keyword}%,description.ilike.%${keyword}%,category.ilike.%${keyword}%`
+    )
+    .order("added_date", { ascending: false })
+    .limit(limit);
+
+  if (error) {
+    console.error("Error searching products:", error);
+    return [];
+  }
+
+  return data.map((p) => ({
+    id: p.id,
+    name: p.name,
+    description: p.description,
+    images: p.images || [],
+    category: p.category,
+    price: Number(p.price),
+    discount: Number(p.discount),
+    featured: p.featured,
+    in_stock: p.in_stock,
+    on_sale: p.on_sale,
+    sold_count: p.sold_count,
+    added_date: p.added_date,
+  }));
+}

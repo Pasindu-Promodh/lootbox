@@ -4,7 +4,7 @@ import { getProductById } from "../data/fetchProducts";
 import type { Product } from "../data/products";
 
 export interface CartItem {
-  id: number;
+  id: string;
   name: string;
   price: number;
   discount: number;
@@ -14,9 +14,9 @@ export interface CartItem {
 
 interface CartContextType {
   cart: CartItem[];
-  addToCart: (id: number, quantity?: number) => Promise<void>;
-  removeFromCart: (id: number) => void;
-  updateQty: (id: number, qty: number) => void;
+  addToCart: (id: string, quantity?: number) => Promise<void>;
+  removeFromCart: (id: string) => void;
+  updateQty: (id: string, qty: number) => void;
   clearCart: () => void;
   total: number;
   shipping: number;
@@ -48,7 +48,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
   }, [cart]);
 
   // Add item to cart
-  const addToCart = async (id: number, quantity: number = 1) => {
+  const addToCart = async (id: string, quantity: number = 1) => {
     try {
       const product: Product | null = await getProductById(String(id));
 
@@ -87,7 +87,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
-  const removeFromCart = (id: number) => {
+  const removeFromCart = (id: string) => {
     const item = cart.find((i) => i.id === id);
     setCart((prev) => prev.filter((i) => i.id !== id));
 
@@ -96,7 +96,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
-  const updateQty = (id: number, qty: number) => {
+  const updateQty = (id: string, qty: number) => {
     if (qty < 1) {
       removeFromCart(id);
       return;

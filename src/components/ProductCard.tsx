@@ -11,8 +11,8 @@ import type { Product } from "../data/products";
 
 type Props = {
   product: Product;
-  onClickProduct: (id: number) => void;
-  onAddToCart: (e: React.MouseEvent, id: number) => void;
+  onClickProduct: (id: string) => void;
+  onAddToCart: (e: React.MouseEvent, id: string) => void;
   fontSizes?: {
     name?: string;
     price?: string;

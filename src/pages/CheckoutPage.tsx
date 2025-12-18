@@ -153,7 +153,7 @@ const CheckoutPage: React.FC = () => {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleClickProduct = (productId: number) => {
+  const handleClickProduct = (productId: string) => {
     navigate(`/product/${productId}`);
   };
 

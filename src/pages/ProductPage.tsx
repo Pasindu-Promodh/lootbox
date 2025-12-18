@@ -80,12 +80,12 @@ export default function ProductPage() {
 
   const toggleZoom = () => setZoomed((z) => !z);
 
-  const handleAddToCart = (e: React.MouseEvent, productId: number) => {
+  const handleAddToCart = (e: React.MouseEvent, productId: string) => {
     e.stopPropagation();
     addToCart(productId);
   };
 
-  const handleClickProduct = (productId: number) => {
+  const handleClickProduct = (productId: string) => {
     navigate(`/product/${productId}`);
   };
 

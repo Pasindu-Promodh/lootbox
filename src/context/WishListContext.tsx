@@ -4,7 +4,7 @@ import { useNotification } from "./NotificationContext";
 import { getProductById } from "../data/fetchProducts";
 
 export interface WishListItem {
-  id: number;
+  id: string;
   name: string;
   price: number;
   discount: number;
@@ -13,9 +13,9 @@ export interface WishListItem {
 
 interface WishListContextType {
   wishList: WishListItem[];
-  addToWishList: (id: number) => void;
-  removeFromWishList: (id: number) => void;
-  isInWishList: (id: number) => boolean;
+  addToWishList: (id: string) => void;
+  removeFromWishList: (id: string) => void;
+  isInWishList: (id: string) => boolean;
   totalWishList: number;
 }
 
@@ -42,7 +42,7 @@ export const WishListProvider: React.FC<{ children: React.ReactNode }> = ({
     localStorage.setItem("wishlist", JSON.stringify(wishList));
   }, [wishList]);
 
-  const addToWishList = async (id: number) => {
+  const addToWishList = async (id: string) => {
     try {
       const product: Product | null = await getProductById(String(id));
 
@@ -73,7 +73,7 @@ export const WishListProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
-  const removeFromWishList = (id: number) => {
+  const removeFromWishList = (id: string) => {
     const item = wishList.find((i) => i.id === id);
     if (item) {
       showNotification(`${item.name} removed from wishlist`, "error");
@@ -81,7 +81,7 @@ export const WishListProvider: React.FC<{ children: React.ReactNode }> = ({
     setWishList((prev) => prev.filter((i) => i.id !== id));
   };
 
-  const isInWishList = (id: number) => {
+  const isInWishList = (id: string) => {
     return wishList.some((i) => i.id === id);
   };
 

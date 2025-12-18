@@ -6,6 +6,8 @@ import {
   IconButton,
   Divider,
   Button,
+  useTheme,
+  useMediaQuery,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { useCart } from "../../context/CartContext";
@@ -15,12 +17,14 @@ import { useNavigate } from "react-router-dom";
 interface CartDrawerProps {
   open: boolean;
   onClose: () => void;
-  onClickProduct: (id: number) => void;
+  onClickProduct: (id: string) => void;
 }
 
 const CartDrawer: React.FC<CartDrawerProps> = ({ open, onClose, onClickProduct }) => {
   const { cart, total, shipping } = useCart();
   const navigate = useNavigate();
+  const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   // Calculate original total (before discount)
   const originalTotal = cart.reduce(
@@ -36,7 +40,12 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ open, onClose, onClickProduct }
       anchor="right"
       open={open}
       onClose={onClose}
-      PaperProps={{ sx: { width: 400 } }}
+      PaperProps={{
+        sx: {
+          width: isMobile ? "100vw" : 400,
+          maxWidth: "100vw",
+        },
+      }}
     >
       {/* Header */}
       <Box

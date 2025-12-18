@@ -63,7 +63,7 @@ const Navbar: React.FC = () => {
     handleMenuClose();
   };
 
-  const handleClickProduct = (productId: number) => {
+  const handleClickProduct = (productId: string) => {
     navigate(`/product/${productId}`);
   };
 

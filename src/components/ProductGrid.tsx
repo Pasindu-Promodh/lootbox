@@ -6,8 +6,8 @@ import ProductCardSkeleton from "./ProductCardSkeleton";
 
 type Props = {
   products: Product[];
-  onClickProduct: (id: number) => void;
-  onAddToCart: (e: React.MouseEvent, id: number) => void;
+  onClickProduct: (id: string) => void;
+  onAddToCart: (e: React.MouseEvent, id: string) => void;
   loading?: boolean;
 };
 

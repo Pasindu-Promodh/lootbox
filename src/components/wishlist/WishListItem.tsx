@@ -9,7 +9,7 @@ import {
 interface Props {
   item: WishListItemType;
   onClose: () => void;
-  onClickProduct: (id: number) => void;
+  onClickProduct: (id: string) => void;
 }
 
 const WishListItem: React.FC<Props> = ({ item, onClose, onClickProduct }) => {
@@ -51,11 +51,13 @@ const WishListItem: React.FC<Props> = ({ item, onClose, onClickProduct }) => {
         >
           {item.name}
         </Typography>
-        <Box sx={{ display: "flex", gap: 1, alignItems: "center", mt: 0.3 }}>
+        <Box sx={{ display: "flex", gap: 1, alignItems: "center"
+          // , mt: 0.3 
+          }}>
           <Typography
             variant="body2"
             fontWeight={500}
-            sx={{ fontSize: "1.1rem", color: "primary.main" }}
+            sx={{ fontSize: "1rem", color: "primary.main" }}
           >
             Rs {Math.round(item.price * (1 - item.discount / 100)).toLocaleString()}
           </Typography>

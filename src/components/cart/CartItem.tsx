@@ -9,7 +9,7 @@ import {
 interface Props {
   item: CartItemType;
   onClose?: () => void;
-  onClickProduct: (id: number) => void;
+  onClickProduct: (id: string) => void;
 }
 
 const CartItem: React.FC<Props> = ({ item, onClose, onClickProduct }) => {

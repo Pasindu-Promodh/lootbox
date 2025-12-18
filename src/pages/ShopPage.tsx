@@ -132,7 +132,7 @@ const ShopPage: React.FC = () => {
     return () => io.disconnect();
   }, [filteredSorted.length, itemsToShow, isLoadingMore]);
 
-  const handleAddToCart = (e: React.MouseEvent, productId: number) => {
+  const handleAddToCart = (e: React.MouseEvent, productId: string) => {
     e.stopPropagation();
     addToCart(productId);
   };

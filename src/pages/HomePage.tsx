@@ -15,12 +15,12 @@ const HomePage: React.FC = () => {
   const [newArrivals, setNewArrivals] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const handleAddToCart = (e: React.MouseEvent, productId: number) => {
+  const handleAddToCart = (e: React.MouseEvent, productId: string) => {
     e.stopPropagation();
     addToCart(productId);
   };
 
-  const handleClickProduct = (productId: number) => {
+  const handleClickProduct = (productId: string) => {
     navigate(`/product/${productId}`);
   };
 

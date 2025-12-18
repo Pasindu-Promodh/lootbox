@@ -14,8 +14,8 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 
 type Props = {
   products: Product[];
-  onClickProduct: (id: number) => void;
-  onAddToCart: (e: React.MouseEvent, id: number) => void;
+  onClickProduct: (id: string) => void;
+  onAddToCart: (e: React.MouseEvent, id: string) => void;
   loading?: boolean;
   title: string;
 };
