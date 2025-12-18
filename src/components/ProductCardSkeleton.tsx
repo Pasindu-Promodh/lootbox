@@ -1,10 +1,15 @@
 import React from "react";
 import { Card, CardContent, Box, Skeleton } from "@mui/material";
 
-const ProductCardSkeleton: React.FC = () => {
+type Props = {
+  sx?: object;
+};
+
+const ProductCardSkeleton: React.FC<Props> = ({sx}) => {
   return (
     <Card
       sx={{
+        ...sx,
         borderRadius: 2,
         overflow: "hidden",
         position: "relative",

@@ -95,44 +95,33 @@ const HomePage: React.FC = () => {
         sx={{ width: "100%", maxWidth: 1700, mx: "auto", px: { xs: 2, sm: 5 } }}
       >
         {/* Featured */}
-        <Box sx={{ my: 6 }}>
-          <Typography variant="h4" sx={{ mb: 2 }}>
-            Featured Products
-          </Typography>
 
-          <ProductSlider
-            products={featuredProducts}
-            onClickProduct={handleClickProduct}
-            onAddToCart={handleAddToCart}
-            loading={loading}
-          />
-        </Box>
+        <ProductSlider
+          products={featuredProducts}
+          onClickProduct={handleClickProduct}
+          onAddToCart={handleAddToCart}
+          loading={loading}
+          title="Featured Products"
+        />
 
         {/* Best Sellers */}
-        <Box sx={{ my: 6 }}>
-          <Typography variant="h4" sx={{ mb: 2 }}>
-            Best Sellers
-          </Typography>
-          <ProductSlider
-            products={bestSellers}
-            onClickProduct={handleClickProduct}
-            onAddToCart={handleAddToCart}
-            loading={loading}
-          />
-        </Box>
+
+        <ProductSlider
+          products={bestSellers}
+          onClickProduct={handleClickProduct}
+          onAddToCart={handleAddToCart}
+          loading={loading}
+          title="Best Sellers"
+        />
 
         {/* New Arrivals */}
-        <Box sx={{ my: 6 }}>
-          <Typography variant="h4" sx={{ mb: 2 }}>
-            New Arrivals
-          </Typography>
-          <ProductSlider
-            products={newArrivals}
-            onClickProduct={handleClickProduct}
-            onAddToCart={handleAddToCart}
-            loading={loading}
-          />
-        </Box>
+        <ProductSlider
+          products={newArrivals}
+          onClickProduct={handleClickProduct}
+          onAddToCart={handleAddToCart}
+          loading={loading}
+          title="New Arrivals"
+        />
       </Box>
     </div>
   );
