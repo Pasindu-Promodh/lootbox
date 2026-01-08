@@ -5,6 +5,7 @@ import { getProducts } from "../data/fetchProducts";
 import ProductSlider from "../components/ProductSlider";
 import { useCart } from "../context/CartContext";
 import type { Product } from "../data/products";
+import { keyframes } from "@mui/system";
 
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
@@ -53,6 +54,25 @@ const HomePage: React.FC = () => {
     setLoading(false);
   }
 
+  const flyInLeft = keyframes`
+  0% { opacity: 0; transform: translateX(-100px) rotate(-10deg); }
+  60% { transform: translateX(10px) rotate(5deg); opacity: 1; }
+  80% { transform: translateX(-5px) rotate(-2deg); }
+  100% { transform: translateX(0) rotate(0deg); }
+`;
+
+const flyInRight = keyframes`
+  0% { opacity: 0; transform: translateX(100px) rotate(10deg); }
+  60% { transform: translateX(-10px) rotate(-5deg); opacity: 1; }
+  80% { transform: translateX(5px) rotate(2deg); }
+  100% { transform: translateX(0) rotate(0deg); }
+`;
+
+const floatGlow = keyframes`
+  0%, 100% { transform: translateY(0); box-shadow: 0 0 10px rgba(255,255,255,0.5); }
+  50% { transform: translateY(-6px); box-shadow: 0 0 20px rgba(255,255,255,0.9); }
+`;
+
   // if (loading) {
   //   return (
   //     <Box sx={{ mt: 10, display: "flex", justifyContent: "center" }}>
@@ -64,7 +84,7 @@ const HomePage: React.FC = () => {
   return (
     <div>
       {/* Hero Section */}
-      <Box
+      {/* <Box
         sx={{
           backgroundImage:
             "url(https://placehold.co/1200x400?text=LootBox&bg=555&fg=fff)",
@@ -89,6 +109,91 @@ const HomePage: React.FC = () => {
         >
           Start Shopping
         </Button>
+      </Box> */}
+
+      <Box
+        sx={{
+          backgroundImage:
+            "url(https://placehold.co/1200x400?text=LootBox&bg=555&fg=fff)",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          color: "#fff",
+          py: { xs: 6, md: 12 },
+          textAlign: "center",
+        }}
+      >
+        <Typography variant="h3" sx={{ fontWeight: "bold", mb: 2 }}>
+          Shop the Best Deals!
+        </Typography>
+
+        <Typography variant="h6" sx={{ mb: 2, px: { xs: 2, md: 0 } }}>
+          Find your favorite gadgets, accessories, and more at amazing prices.
+        </Typography>
+
+        {/* COD Trust Badge */}
+        <Box
+  sx={{
+    display: "flex",
+    justifyContent: "center",
+    gap: 3,
+    flexWrap: "wrap",
+    mb: 5,
+    position: "relative",
+  }}
+>
+  {/* COD Badge */}
+  <Box
+    sx={{
+      px: 2,
+      py: 1,
+      borderRadius: 3,
+      backgroundColor: "rgba(255, 111, 0, 0.6)",
+      color: "#fff",
+      fontWeight: 700,
+      display: "flex",
+      alignItems: "center",
+      gap: 1.2,
+      animation: `${flyInLeft} 0.9s ease-out, ${floatGlow} 2s infinite alternate`,
+      cursor: "default",
+      boxShadow: "0 6px 18px rgba(0,0,0,0.35)",
+    }}
+  >
+    💵 Cash on Delivery
+  </Box>
+
+  {/* Delivery Badge */}
+  <Box
+    sx={{
+      px: 2,
+      py: 1,
+      borderRadius: 3,
+      backgroundColor: "rgba(0, 176, 255, 0.6)",
+      color: "#fff",
+      fontWeight: 700,
+      display: "flex",
+      alignItems: "center",
+      gap: 1.2,
+      animation: `${flyInRight} 0.9s ease-out 0.2s, ${floatGlow} 2s infinite alternate`,
+      cursor: "default",
+      boxShadow: "0 6px 18px rgba(0,0,0,0.35)",
+    }}
+  >
+    🚚 1–5 Working Days Delivery
+  </Box>
+</Box>
+
+
+
+        <Box>
+          <Button
+            variant="contained"
+            color="secondary"
+            size="large"
+            onClick={() => navigate("/shop")}
+          >
+            Start Shopping
+          </Button>
+        </Box>
       </Box>
 
       <Box
