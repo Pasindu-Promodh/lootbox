@@ -114,7 +114,7 @@ const HomePage: React.FC = () => {
       <Box
         sx={{
           backgroundImage:
-            "url(https://placehold.co/1200x400?text=LootBox&bg=555&fg=fff)",
+            "url(https://placehold.co/1200x400?text=Pickio&bg=555&fg=fff)",
           backgroundSize: "cover",
           backgroundPosition: "center",
           color: "#fff",

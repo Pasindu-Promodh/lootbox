@@ -157,7 +157,7 @@ const ShopPage: React.FC = () => {
       }}
     >
       <Typography variant="h4" gutterBottom textAlign="center" fontWeight={700}>
-        LootBox Shop
+        Pickio Shop
       </Typography>
       <Typography
         variant="subtitle1"

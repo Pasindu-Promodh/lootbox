@@ -81,7 +81,7 @@ const Navbar: React.FC = () => {
             }}
             onClick={() => navigate("/")}
           >
-            LootBox
+            Pickio
           </Box>
 
           {/* Desktop */}
