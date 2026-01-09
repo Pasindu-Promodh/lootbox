@@ -70,9 +70,16 @@ const Navbar: React.FC = () => {
   return (
     <>
       <AppBar position="sticky">
-        <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
+        <Toolbar
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            background: "linear-gradient(90deg, #0f172a 0%, #1e3a8a 100%)",
+            boxShadow: "0 1px 0 rgba(255,255,255,0.05)",
+          }}
+        >
           {/* Logo */}
-          <Box
+          {/* <Box
             sx={{
               cursor: "pointer",
               fontWeight: 600,
@@ -82,6 +89,27 @@ const Navbar: React.FC = () => {
             onClick={() => navigate("/")}
           >
             Pickio
+          </Box> */}
+
+          <Box
+            onClick={() => navigate("/")}
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              cursor: "pointer",
+              gap: 1,
+            }}
+          >
+            <Box
+              component="img"
+              src="/lootbox/Pickio_Logo.png"
+              alt="Pickio"
+              sx={{
+                height: 36,
+                width: "auto",
+                objectFit: "contain",
+              }}
+            />
           </Box>
 
           {/* Desktop */}
