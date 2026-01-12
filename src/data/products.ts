@@ -1,10 +1,14 @@
 // src/data/products.ts
+export type ProductImage = {
+  main: string;
+  thumb: string;
+};
 
 export type Product = {
   id: string;
   name: string;
   description: string;
-  images: string[];
+  images: ProductImage[];
   category: string;
   price: number;
   discount: number;

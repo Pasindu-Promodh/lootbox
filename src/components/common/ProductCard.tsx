@@ -7,7 +7,7 @@ import {
   Box,
   Skeleton,
 } from "@mui/material";
-import type { Product } from "../data/products";
+import type { Product } from "../../data/products";
 
 type Props = {
   product: Product;
@@ -103,12 +103,18 @@ const ProductCard: React.FC<Props> = ({
           <Skeleton
             variant="rectangular"
             animation="wave"
-            sx={{ position: "absolute", inset: 0 }}
+            // sx={{ position: "absolute", inset: 0 }}
+            sx={{
+            position: "absolute",
+            inset: 0,
+            width: "100%",
+            height: "100%",
+          }}
           />
         )}
         <CardMedia
           component="img"
-          src={product.images?.[0]}
+          src={product.images[0].thumb}
           alt={product.name}
           onLoad={() => setLoaded(true)}
           sx={{

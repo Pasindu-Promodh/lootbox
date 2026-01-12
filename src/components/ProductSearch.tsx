@@ -122,7 +122,7 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
         >
           <CardMedia
             component="img"
-            image={p.images?.[0]}
+            image={p.images?.[0]?.thumb}
             alt={p.name}
             sx={{ width: 80, height: 80, objectFit: "cover", borderRadius: 1 }}
           />
@@ -249,7 +249,7 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
                   >
                     <CardMedia
                       component="img"
-                      image={p.images?.[0]}
+                      image={p.images?.[0]?.thumb}
                       alt={p.name}
                       sx={{
                         width: 80,

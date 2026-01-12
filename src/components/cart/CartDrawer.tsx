@@ -104,6 +104,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ open, onClose, onClickProduct }
 
           {/* Discount */}
           {discountTotal > 0 && (
+            <>
             <Typography
               variant="body2"
               color="error"
@@ -116,7 +117,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ open, onClose, onClickProduct }
               <span>Discount</span>
               <span>- Rs {discountTotal.toLocaleString()}</span>
             </Typography>
-          )}
+          
 
           {/* Price After Discount */}
           <Typography
@@ -131,7 +132,8 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ open, onClose, onClickProduct }
             <span>Discounted Subtotal</span>
             <span>Rs {total.toLocaleString()}</span>
           </Typography>
-
+          </>
+)}
           {/* Shipping */}
           <Typography
             variant="body2"

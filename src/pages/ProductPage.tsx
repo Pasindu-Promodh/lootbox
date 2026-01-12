@@ -41,7 +41,7 @@ export default function ProductPage() {
     setLoading(true);
     const prod = await getProductById(productId);
     setProduct(prod);
-    if (prod) setMainImage(prod.images[0] || "");
+    if (prod) setMainImage(prod.images[0]?.main || "");
 
     // Fetch related products by category (exclude current product)
     if (prod) {
@@ -53,30 +53,51 @@ export default function ProductPage() {
   };
 
   useEffect(() => {
-    if (product) setMainImage(product.images[0]);
+    if (product) setMainImage(product.images[0]?.main || "");
     setZoomed(false);
   }, [product]);
 
-  const index = mainImage ? product?.images.indexOf(mainImage) ?? 0 : 0;
+  // const index = mainImage ? product?.images.indexOf(mainImage) ?? 0 : 0;
+  const index = mainImage
+  ? product?.images.findIndex((img) => img.main === mainImage) ?? 0
+  : 0;
+
+  // const goNext = useCallback(
+  //   () =>
+  //     setMainImage(
+  //       product?.images[(index + 1) % (product.images.length || 1)] || ""
+  //     ),
+  //   [index, product]
+  // );
+
+  // const goPrev = useCallback(
+  //   () =>
+  //     setMainImage(
+  //       product?.images[
+  //         (index - 1 + (product?.images.length || 1)) %
+  //           (product?.images.length || 1)
+  //       ] || ""
+  //     ),
+  //   [index, product]
+  // );
 
   const goNext = useCallback(
-    () =>
-      setMainImage(
-        product?.images[(index + 1) % (product.images.length || 1)] || ""
-      ),
-    [index, product]
-  );
+  () =>
+    setMainImage(
+      product?.images[(index + 1) % (product.images.length || 1)]?.main || ""
+    ),
+  [index, product]
+);
 
-  const goPrev = useCallback(
-    () =>
-      setMainImage(
-        product?.images[
-          (index - 1 + (product?.images.length || 1)) %
-            (product?.images.length || 1)
-        ] || ""
-      ),
-    [index, product]
-  );
+const goPrev = useCallback(
+  () =>
+    setMainImage(
+      product?.images[
+        (index - 1 + (product?.images.length || 1)) % (product?.images.length || 1)
+      ]?.main || ""
+    ),
+  [index, product]
+);
 
   const toggleZoom = () => setZoomed((z) => !z);
 
@@ -160,8 +181,8 @@ export default function ProductPage() {
           <Box sx={{ display: "flex", gap: 2, mt: 2, overflowX: "auto" }}>
             {product.images.map((img) => (
               <Box
-                key={img}
-                onClick={() => setMainImage(img)}
+                key={img.main}
+                onClick={() => setMainImage(img.main)}
                 sx={{
                   width: 90,
                   height: 90,
@@ -169,14 +190,12 @@ export default function ProductPage() {
                   cursor: "pointer",
                   overflow: "hidden",
                   border:
-                    img === mainImage
-                      ? "2px solid #1976d2"
-                      : "2px solid transparent",
+                    img.main === mainImage ? "2px solid #1976d2" : "2px solid transparent",
                 }}
               >
                 <CardMedia
                   component="img"
-                  src={img}
+                  src={img.thumb}
                   sx={{ width: "100%", height: "100%", objectFit: "cover" }}
                 />
               </Box>
@@ -287,7 +306,7 @@ export default function ProductPage() {
       {/* FULLSCREEN VIEWER */}
       <FullscreenViewer
         open={viewerOpen}
-        images={product.images}
+        images={product.images.map((img) => img.main)}
         currentIndex={index}
         onClose={() => setViewerOpen(false)}
         onPrev={goPrev}

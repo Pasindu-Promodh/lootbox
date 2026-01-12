@@ -1,37 +1,5 @@
-// import { supabase } from "../supabase";
-// import type { Product } from "./products";
 
-// export async function getProducts(): Promise<Product[]> {
-//   const { data, error } = await supabase
-//     .from("products")
-//     .select("*")
-//     .order("addedDate", { ascending: false }); // newest first
-
-//   if (error) {
-//     console.error("Error loading products:", error);
-//     return [];
-//   }
-
-//   // map DB → your Product type
-//   return data.map((p) => ({
-//     id: p.id,
-//     name: p.name,
-//     category: p.category,
-//     price: Number(p.price),
-//     originalPrice: p.originalPrice ? Number(p.originalPrice) : undefined,
-//     images: p.images || [],
-//     inStock: p.inStock,
-//     onSale: p.onSale,
-//     description: p.description,
-//     longDescription: p.longDescription,
-//     featured: p.featured,
-//     soldCount: p.soldCount,
-//     addedDate: p.addedDate,
-//   }));
-// }
-
-
-// src/data/getProducts.ts
+// src/data/fetchProducts.ts
 import { supabase } from "../supabase";
 import type { Product } from "./products";
 
@@ -124,7 +92,7 @@ export async function getProductById(id: string | undefined): Promise<Product | 
     .single();
 
   if (error) {
-    console.error(`Error loading product ${id}:`, error);
+    //console.error(`Error loading product ${id}:`, error);
     return null;
   }
 
@@ -144,6 +112,27 @@ export async function getProductById(id: string | undefined): Promise<Product | 
   };
 }
 
+// Lightweight product lookup for orders
+export async function getProductsByIds(ids: string[]) {
+  if (!ids.length) return {};
+
+  const { data, error } = await supabase
+    .from("products_public")
+    .select("id, name, images")
+    .in("id", ids);
+
+  if (error) {
+    console.error("Error loading order products", error);
+    return {};
+  }
+
+  const map: Record<string, any> = {};
+  data?.forEach((p) => {
+    map[p.id] = p;
+  });
+
+  return map;
+}
 
 export async function searchProducts(
   keyword: string,

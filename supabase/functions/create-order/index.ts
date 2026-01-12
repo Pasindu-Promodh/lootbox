@@ -93,6 +93,7 @@ serve(async (req) => {
     const discount = subtotal - discounted_subtotal;
     const shipping = 350;
     const total = subtotal + shipping - discount;
+    const status_log = [{ status: "pending", note: "Order placed", at: new Date().toISOString() }];
 
     const { data: order, error: insertErr } = await supabase
       .from("orders")
@@ -110,6 +111,7 @@ serve(async (req) => {
         phone1: customer.phone1,
         phone2: customer.phone2,
         payment_method,
+        status_log,
       })
       .select("id")
       .single();

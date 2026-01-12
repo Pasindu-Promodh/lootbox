@@ -1,9 +1,12 @@
 import {
   Box,
+  Button,
   Card,
   CardContent,
   Chip,
   Divider,
+  IconButton,
+  Tooltip,
   Typography,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
@@ -15,21 +18,31 @@ import OrderStatusLogView from "./OrderStatusLog";
 import { Accordion, AccordionSummary, AccordionDetails } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { getLatestOrderStatus } from "../../utils/orderStatus";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import { useState } from "react";
+import { supabase } from "../../supabase";
+import { useNotification } from "../../context/NotificationContext";
+import ConfirmDialog from "../common/ConfirmDialog";
 
 interface Props {
   order: Order;
   productMap: Record<string, any>;
+  userId: string;
   expanded: boolean;
   onToggle: () => void;
+  onOrderUpdated: () => void;
 }
 
 const OrderCard: React.FC<Props> = ({
   order,
   productMap,
+  userId,
   expanded,
   onToggle,
+  onOrderUpdated,
 }) => {
   const navigate = useNavigate();
+  const { showNotification } = useNotification();
 
   const latestStatus = getLatestOrderStatus(order);
 
@@ -53,6 +66,9 @@ const OrderCard: React.FC<Props> = ({
     cancelled: { chipColor: "error", borderColor: "#F44336" },
   };
 
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [isMarkingDelivered, setIsMarkingDelivered] = useState(false);
+
   const getStatusStyle = (status: OrderStatus) => {
     return (
       statusStyles[status] || { chipColor: "default", borderColor: "#BDBDBD" }
@@ -60,6 +76,33 @@ const OrderCard: React.FC<Props> = ({
   };
 
   const latestStatusStyle = getStatusStyle(latestStatus);
+
+  const copyToClipboard = async (text: string) => {
+    await navigator.clipboard.writeText(text);
+  };
+
+  const handleConfirmDelivered = async () => {
+    setIsMarkingDelivered(true);
+
+    try {
+      const { error } = await supabase.rpc("mark_order_delivered", {
+        p_order_id: order.id,
+        p_user_id: userId,
+      });
+
+      if (error) throw error;
+
+      setConfirmOpen(false);
+      showNotification("Order marked as delivered", "success");
+
+      onOrderUpdated(); // refresh parent data
+    } catch (err) {
+      console.error(err);
+      showNotification("Failed to mark order as delivered", "error");
+    } finally {
+      setIsMarkingDelivered(false);
+    }
+  };
 
   return (
     <Card
@@ -81,9 +124,19 @@ const OrderCard: React.FC<Props> = ({
           mb={1}
         >
           <Box>
-            <Typography fontWeight={700} variant="subtitle1">
-              Order #{order.id.slice(0, 8).toUpperCase()}
-            </Typography>
+            <Box display="flex" alignItems="center">
+              <Typography fontWeight={700} variant="subtitle1">
+                #{order.id.slice(0, 8).toUpperCase()}
+              </Typography>
+              <Tooltip title="Copy order ID">
+                <IconButton
+                  size="small"
+                  onClick={() => copyToClipboard(order.id)}
+                >
+                  <ContentCopyIcon fontSize="inherit" />
+                </IconButton>
+              </Tooltip>
+            </Box>
             <Typography variant="body2" color="text.secondary">
               {new Date(order.created_at).toLocaleString()}
             </Typography>
@@ -132,7 +185,9 @@ const OrderCard: React.FC<Props> = ({
             <Divider sx={{ mb: 2 }} />
             <OrderDetails order={order} />
             <Divider sx={{ my: 2 }} />
-            <OrderStatusLogView log={order.status_log} />
+            <OrderStatusLogView
+              log={order.status_log}
+            />
             <Divider sx={{ my: 2 }} />
             <OrderItems
               items={order.items}
@@ -143,7 +198,27 @@ const OrderCard: React.FC<Props> = ({
             <OrderPriceBreakdown order={order} />
           </AccordionDetails>
         </Accordion>
+        {latestStatus !== "delivered" && latestStatus !== "cancelled" && (
+          <Button
+            variant="contained"
+            color="success"
+            onClick={() => setConfirmOpen(true)}
+            disabled={isMarkingDelivered}
+            sx={{ mt: 2 }}
+          >
+            {isMarkingDelivered ? "Confirming..." : "Mark as Delivered"}
+          </Button>
+        )}
       </CardContent>
+      <ConfirmDialog
+        open={confirmOpen}
+        title="Confirm delivery"
+        description="Please confirm that you have received this order. This action cannot be undone."
+        confirmText="Yes, I received it"
+        loading={isMarkingDelivered}
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={handleConfirmDelivered}
+      />
     </Card>
   );
 };

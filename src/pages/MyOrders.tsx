@@ -15,10 +15,14 @@ import { useNavigate } from "react-router-dom";
 import { useNotification } from "../context/NotificationContext";
 import OrderCard from "../components/orders/OrderCard";
 import type { Order, OrderStatus } from "../types/order";
+import { getUserOrders } from "../data/getOrders";
+import { getProductsByIds } from "../data/fetchProducts";
 
 const MyOrders: React.FC = () => {
   const navigate = useNavigate();
   const { showNotification } = useNotification();
+
+  const [userId, setUserId] = useState<string | null>(null);
 
   const [orders, setOrders] = useState<Order[]>([]);
   const [productMap, setProductMap] = useState<Record<string, any>>({});
@@ -30,6 +34,38 @@ const MyOrders: React.FC = () => {
   useEffect(() => {
     loadOrders();
   }, []);
+
+  // const loadOrders = async () => {
+  //   try {
+  //     const {
+  //       data: { session },
+  //     } = await supabase.auth.getSession();
+
+  //     if (!session) {
+  //       showNotification("Please login to view orders", "error");
+  //       navigate("/");
+  //       return;
+  //     }
+
+  //     const orders = await getUserOrders(session.user.id);
+  //     setOrders(orders);
+
+  //     const productIds = Array.from(
+  //       new Set(
+  //         orders.flatMap((o) =>
+  //           o.items.map((i: { product_id: string }) => i.product_id)
+  //         )
+  //       )
+  //     );
+
+  //     const productMap = await getProductsByIds(productIds);
+  //     setProductMap(productMap);
+  //   } catch {
+  //     showNotification("Failed to load orders", "error");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   const loadOrders = async () => {
     try {
@@ -43,32 +79,20 @@ const MyOrders: React.FC = () => {
         return;
       }
 
-      const { data } = await supabase
-        .from("orders")
-        .select("*")
-        .eq("user_id", session.user.id)
-        .order("created_at", { ascending: false });
+      setUserId(session.user.id);
 
-      setOrders(data || []);
+      const orders = await getUserOrders(session.user.id);
+      setOrders(orders);
 
       const productIds = Array.from(
         new Set(
-          data?.flatMap((o) =>
+          orders.flatMap((o) =>
             o.items.map((i: { product_id: string }) => i.product_id)
           )
         )
       );
 
-      if (productIds.length) {
-        const { data: products } = await supabase
-          .from("products")
-          .select("id, name, images")
-          .in("id", productIds);
-
-        const map: Record<string, any> = {};
-        products?.forEach((p) => (map[p.id] = p));
-        setProductMap(map);
-      }
+      setProductMap(await getProductsByIds(productIds));
     } catch {
       showNotification("Failed to load orders", "error");
     } finally {
@@ -106,10 +130,33 @@ const MyOrders: React.FC = () => {
   return (
     <Box sx={{ maxWidth: 1200, mx: "auto", px: 2, my: 6 }}>
       {orders.length === 0 ? (
-        <Box textAlign="center">
-          <Typography>No orders yet</Typography>
-          <Button variant="contained" onClick={() => navigate("/shop")}>
-            Start Shopping
+        <Box
+          textAlign="center"
+          sx={{
+            py: 10,
+            px: 2,
+            borderRadius: 3,
+            backgroundColor: "background.paper",
+            boxShadow: 1,
+          }}
+        >
+          <Box sx={{ fontSize: 64, mb: 2 }}>📦</Box>
+
+          <Typography variant="h5" fontWeight={600} gutterBottom>
+            No orders yet
+          </Typography>
+
+          <Typography color="text.secondary" sx={{ mb: 4 }}>
+            Looks like you haven’t placed any orders yet. Once you do, they’ll
+            show up here.
+          </Typography>
+
+          <Button
+            variant="contained"
+            size="large"
+            onClick={() => navigate("/shop")}
+          >
+            Browse Products
           </Button>
         </Box>
       ) : (
@@ -150,10 +197,13 @@ const MyOrders: React.FC = () => {
             </FormControl>
           </Box>
           {visibleOrders.map((order) => (
+
             <OrderCard
               key={order.id}
               order={order}
               productMap={productMap}
+              userId={userId!}
+              onOrderUpdated={loadOrders}
               expanded={expandedOrderId === order.id}
               onToggle={() =>
                 setExpandedOrderId(

@@ -74,6 +74,11 @@ const Profile: React.FC = () => {
     return pattern.test(value);
   };
 
+  const arePhonesDifferent = (p1: string, p2: string) => {
+    if (p1 === "" || p2 === "") return true; // only enforce when both exist
+    return p1 !== p2;
+  };
+
   // Check if there are changes
   const hasChanges =
     address !== originalAddress ||
@@ -82,7 +87,10 @@ const Profile: React.FC = () => {
     phone2 !== originalPhone2;
 
   // Check if all fields are valid
-  const isValid = validatePhone(phone1) && validatePhone(phone2);
+  const isValid =
+    validatePhone(phone1) &&
+    validatePhone(phone2) &&
+    arePhonesDifferent(phone1, phone2);
 
   const isSaveDisabled = saving || !hasChanges || !isValid;
 
@@ -195,25 +203,30 @@ const Profile: React.FC = () => {
         >
           {/* Left side: Avatar + Name + Email + Member Since */}
           {/* <Box sx={{ display: "flex", alignItems: "center",justifyContent:"center", gap: 3,flexDirection: { xs: "column", md: "row" }, }}> */}
-            <Avatar
-              src={user_metadata?.avatar_url}
-              alt={user_metadata?.full_name || email}
-              sx={{ width: 150, height: 150 }}
-            >
-              {user_metadata?.full_name?.charAt(0).toUpperCase() ||
-                email?.charAt(0).toUpperCase()}
-            </Avatar>
-            <Box sx={{ textAlign: { xs: "center", md: "left" }, width: { xs: "100%", md: "auto" } }}>
-              <Typography variant="h5" fontWeight={600}>
-                {user_metadata?.full_name || "User"}
-              </Typography>
-              <Typography variant="body1" color="text.secondary" fontWeight={600}>
-                {email}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Member Since: {new Date(created_at || "").toLocaleDateString()}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
+          <Avatar
+            src={user_metadata?.avatar_url}
+            alt={user_metadata?.full_name || email}
+            sx={{ width: 150, height: 150 }}
+          >
+            {user_metadata?.full_name?.charAt(0).toUpperCase() ||
+              email?.charAt(0).toUpperCase()}
+          </Avatar>
+          <Box
+            sx={{
+              textAlign: { xs: "center", md: "left" },
+              width: { xs: "100%", md: "auto" },
+            }}
+          >
+            <Typography variant="h5" fontWeight={600}>
+              {user_metadata?.full_name || "User"}
+            </Typography>
+            <Typography variant="body1" color="text.secondary" fontWeight={600}>
+              {email}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Member Since: {new Date(created_at || "").toLocaleDateString()}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
               Last Sign-In: {new Date(last_sign_in_at || "").toLocaleString()}
             </Typography>
             <Typography variant="body2" color="text.secondary">
@@ -222,11 +235,11 @@ const Profile: React.FC = () => {
                 ? new Date(profileUpdatedAt).toLocaleString()
                 : "N/A"}
             </Typography>
-            </Box>
           </Box>
+        </Box>
 
-          {/* Right side: Last Sign-In & Last Updated */}
-          {/* <Box sx={{ textAlign: "right" }}>
+        {/* Right side: Last Sign-In & Last Updated */}
+        {/* <Box sx={{ textAlign: "right" }}>
             <Typography variant="body2" color="text.secondary">
               Last Sign-In: {new Date(last_sign_in_at || "").toLocaleString()}
             </Typography>
@@ -260,7 +273,7 @@ const Profile: React.FC = () => {
             <Select
               labelId="district-label"
               value={district}
-              label="District *"
+              label="District"
               onChange={(e) => setDistrict(e.target.value)}
             >
               {districts.map((d) => (
@@ -289,10 +302,15 @@ const Profile: React.FC = () => {
             fullWidth
             value={phone2}
             onChange={(e) => setPhone2(e.target.value)}
-            error={phone2 !== "" && !validatePhone(phone2)}
+            error={
+              phone2 !== "" &&
+              (!validatePhone(phone2) || !arePhonesDifferent(phone1, phone2))
+            }
             helperText={
               phone2 !== "" && !validatePhone(phone2)
                 ? "Invalid phone number format"
+                : phone2 !== "" && !arePhonesDifferent(phone1, phone2)
+                ? "Telephone Number 2 must be different from Telephone Number 1"
                 : "Alternative contact number"
             }
             placeholder="07XXXXXXXX"

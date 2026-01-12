@@ -1,11 +1,23 @@
-import { Box, Typography, Stepper, Step, StepLabel, StepContent, useMediaQuery, type StepIconProps } from "@mui/material";
-import { CheckCircle, Cancel } from "@mui/icons-material";
-import type { OrderStatusLog } from "../../types/order";
+import React, { useMemo } from "react";
+import {
+  Box,
+  Typography,
+  Stepper,
+  Step,
+  StepLabel,
+  useMediaQuery,
+  type StepIconProps,
+} from "@mui/material";
+import {
+  CheckCircle,
+  Cancel,
+} from "@mui/icons-material";
 import { useTheme } from "@mui/material/styles";
+import type { OrderStatus, OrderStatusLog } from "../../types/order";
 
-const defaultStatuses = ["pending", "processing", "shipped", "delivered"];
+const DEFAULT_STATUSES = ["pending", "processing", "shipped", "delivered"];
 
-const statusColors: Record<string, string> = {
+const STATUS_COLORS: Record<string, string> = {
   pending: "#FFB300",
   processing: "#2196F3",
   shipped: "#1976D2",
@@ -17,36 +29,67 @@ interface Props {
   log: OrderStatusLog[];
 }
 
-// Custom step icon to show cross for cancelled
-const CustomStepIcon = (props: StepIconProps & { statusName: string }) => {
-  const { completed, statusName } = props;
-
+/* ---------- Step Icon ---------- */
+const CustomStepIcon = ({
+  completed,
+  statusName,
+}: StepIconProps & { statusName: string }) => {
   if (statusName === "cancelled") {
-    return <Cancel sx={{ color: statusColors.cancelled }} />;
+    return <Cancel sx={{ color: STATUS_COLORS.cancelled }} />;
   }
 
-  return completed ? <CheckCircle sx={{ color: statusColors[statusName] || "grey" }} /> : <Box sx={{ width: 24, height: 24, borderRadius: "50%", border: `2px solid ${statusColors[statusName] || "grey"}` }} />;
+  return completed ? (
+    <CheckCircle sx={{ color: STATUS_COLORS[statusName] || "grey" }} />
+  ) : (
+    <Box
+      sx={{
+        width: 22,
+        height: 22,
+        borderRadius: "50%",
+        border: `2px solid ${STATUS_COLORS[statusName] || "grey"}`,
+      }}
+    />
+  );
 };
 
+/* ---------- Component ---------- */
 const OrderStatusLogView: React.FC<Props> = ({ log }) => {
   const theme = useTheme();
   const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
 
-  const latestStatusLog = log.length ? log[log.length - 1] : { status: "pending" };
-  const latestStatus = latestStatusLog.status.toLowerCase();
 
-  // Build step sequence dynamically
-  let steps = [...defaultStatuses];
+  /* Normalize log:
+     - Ensure pending exists
+     - Use earliest timestamp as order created time
+  */
 
-  const cancelledLog = log.find((l) => l.status.toLowerCase() === "cancelled");
-  if (cancelledLog) {
-    const lastActiveIndex = defaultStatuses.indexOf(latestStatus) > -1 ? defaultStatuses.indexOf(latestStatus) : 0;
-    steps = [
-      ...defaultStatuses.slice(0, lastActiveIndex + 1),
-      "cancelled",
-      ...defaultStatuses.slice(lastActiveIndex + 1),
-    ];
-  }
+  const normalizedLog = useMemo<OrderStatusLog[]>(() => {
+  if (!log?.length) return [];
+
+  return log.map((l) => ({
+    ...l,
+    status: l.status.toLowerCase() as OrderStatus, // normalize
+  }));
+}, [log]);
+
+
+
+  const latestStatus =
+    normalizedLog[normalizedLog.length - 1]?.status ?? "pending";
+
+  /* Build step sequence */
+  const cancelledExists = normalizedLog.some(
+    (l) => l.status.toLowerCase() === "cancelled"
+  );
+
+  const steps = cancelledExists
+    ? [
+        ...DEFAULT_STATUSES.filter((s) =>
+          normalizedLog.some((l) => l.status === s)
+        ),
+        "cancelled",
+      ]
+    : DEFAULT_STATUSES;
 
   return (
     <Box>
@@ -59,35 +102,64 @@ const OrderStatusLogView: React.FC<Props> = ({ log }) => {
         activeStep={steps.indexOf(latestStatus)}
         alternativeLabel={isDesktop}
       >
-        {steps.map((status, i) => {
-          const stepLog = log.find((l) => l.status.toLowerCase() === status);
+        {steps.map((status, index) => {
+          const stepLogs = normalizedLog.filter(
+            (l) => l.status.toLowerCase() === status
+          );
+
           const latestIndex = steps.indexOf(latestStatus);
 
           return (
             <Step
               key={status}
-              completed={i <= latestIndex || (status === "cancelled" && i <= latestIndex)}
+              completed={index <= latestIndex || status === "cancelled"}
             >
-              <StepLabel StepIconComponent={(props) => <CustomStepIcon {...props} statusName={status} />}>
+              <StepLabel
+                StepIconComponent={(props) => (
+                  <CustomStepIcon {...props} statusName={status} />
+                )}
+              >
                 <Typography fontWeight={600} sx={{ fontSize: 12 }}>
                   {status.toUpperCase()}
                 </Typography>
               </StepLabel>
 
-              {stepLog && (
-                <StepContent sx={{ border: isDesktop ? 0 : null }}>
-                  {stepLog.at && (
-                    <Typography variant="body2" color="text.secondary">
-                      {new Date(stepLog.at).toLocaleString()}
-                    </Typography>
-                  )}
-                  {stepLog.note && (
-                    <Typography variant="body2" sx={{ mt: 0.5 }}>
-                      {stepLog.note}
-                    </Typography>
-                  )}
-                </StepContent>
-              )}
+              {stepLogs.length > 0 &&
+                (isDesktop ? (
+                  // Horizontal: just show notes below step label
+                  <Box sx={{ mt: 1, textAlign: "center" }}>
+                    {stepLogs.map((entry, idx) => (
+                      <Box key={idx} sx={{ mb: 0.5 }}>
+                        {entry.at && (
+                          <Typography variant="body2" color="text.secondary">
+                            {new Date(entry.at).toLocaleString()}
+                          </Typography>
+                        )}
+                        {entry.note && (
+                          <Typography variant="body2">{entry.note}</Typography>
+                        )}
+                      </Box>
+                    ))}
+                  </Box>
+                ) : (
+                  // Vertical: use StepContent
+                  <Box sx={{ mt: 1, textAlign: "left" }}>
+                    {stepLogs.map((entry, idx) => (
+                      <Box key={idx} sx={{ mb: 1 }}>
+                        {entry.at && (
+                          <Typography variant="body2" color="text.secondary">
+                            {new Date(entry.at).toLocaleString()}
+                          </Typography>
+                        )}
+                        {entry.note && (
+                          <Typography variant="body2" sx={{ mt: 0.25 }}>
+                            {entry.note}
+                          </Typography>
+                        )}
+                      </Box>
+                    ))}
+                  </Box>
+                ))}
             </Step>
           );
         })}

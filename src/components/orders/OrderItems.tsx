@@ -31,7 +31,7 @@ const OrderItems: React.FC<Props> = ({ items, productMap, onClickProduct }) => (
           {product?.images?.[0] && (
             <Box
               component="img"
-              src={product.images[0]}
+              src={product.images[0]?.thumb}
               sx={{
                 width: 80,
                 height: 80,

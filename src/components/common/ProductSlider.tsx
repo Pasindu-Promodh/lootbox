@@ -7,8 +7,8 @@ import {
   useTheme,
 } from "@mui/material";
 import ProductCard from "./ProductCard";
-import type { Product } from "../data/products";
-import ProductCardSkeleton from "./ProductCardSkeleton";
+import type { Product } from "../../data/products";
+import ProductCardSkeleton from "../ProductCardSkeleton";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 
@@ -124,46 +124,44 @@ const ProductSlider: React.FC<Props> = ({
         ))}
       </Box> */}
 
-
       <Box
-  ref={sliderRef}
-  sx={{
-    display: "flex",
-    gap: 2,
-    overflowX: "auto",
-    py: 2,
-    px: 1,
-    scrollSnapType: "x mandatory",
-    scrollBehavior: "smooth",
-    "&::-webkit-scrollbar": { display: "none" },
-    scrollbarWidth: "none",
-  }}
->
-  {(loading ? Array.from({ length: 6 }) : products).map((p, index) => (
-    <Box
-      key={index}
-      sx={{
-        flex: "0", // force 50% width on xs
-        flexShrink: 0,
-        minWidth: { xs: "50%", sm: "35%", md: "20%" },
-        scrollSnapAlign: "start",
-        display: "flex",       // <-- new
-      }}
-    >
-      {loading ? (
-        <ProductCardSkeleton sx={{ flexGrow: 1 }} />
-      ) : (
-        <ProductCard
-          product={p as Product}
-          onClickProduct={onClickProduct}
-          onAddToCart={onAddToCart}
-          sx={{ flexGrow: 1 }} // <-- new
-        />
-      )}
-    </Box>
-  ))}
-</Box>
-
+        ref={sliderRef}
+        sx={{
+          display: "flex",
+          gap: 2,
+          overflowX: "auto",
+          py: 2,
+          px: 1,
+          scrollSnapType: "x mandatory",
+          scrollBehavior: "smooth",
+          "&::-webkit-scrollbar": { display: "none" },
+          scrollbarWidth: "none",
+        }}
+      >
+        {(loading ? Array.from({ length: 6 }) : products).map((p, index) => (
+          <Box
+            key={index}
+            sx={{
+              flex: "0", // force 50% width on xs
+              flexShrink: 0,
+              minWidth: { xs: "50%", sm: "35%", md: "20%" },
+              scrollSnapAlign: "start",
+              display: "flex", // <-- new
+            }}
+          >
+            {loading ? (
+              <ProductCardSkeleton sx={{ flexGrow: 1 }} />
+            ) : (
+              <ProductCard
+                product={p as Product}
+                onClickProduct={onClickProduct}
+                onAddToCart={onAddToCart}
+                sx={{ flexGrow: 1 }} // <-- new
+              />
+            )}
+          </Box>
+        ))}
+      </Box>
     </Box>
   );
 };

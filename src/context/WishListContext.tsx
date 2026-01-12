@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { type Product } from "../data/products";
 import { useNotification } from "./NotificationContext";
 import { getProductById } from "../data/fetchProducts";
 
@@ -11,9 +10,13 @@ export interface WishListItem {
   image?: string;
 }
 
+interface WishListStorageItem {
+  id: string;
+}
+
 interface WishListContextType {
   wishList: WishListItem[];
-  addToWishList: (id: string) => void;
+  addToWishList: (id: string) => Promise<void>;
   removeFromWishList: (id: string) => void;
   isInWishList: (id: string) => boolean;
   totalWishList: number;
@@ -28,24 +31,53 @@ export const useWishList = () => {
   return context;
 };
 
-export const WishListProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
-  const [wishList, setWishList] = useState<WishListItem[]>(() => {
-    const saved = localStorage.getItem("wishlist");
-    return saved ? JSON.parse(saved) : [];
-  });
-
+export const WishListProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [wishList, setWishList] = useState<WishListItem[]>([]);
   const { showNotification } = useNotification();
 
+  // --- Load wishlist from localStorage and fetch fresh product data ---
   useEffect(() => {
-    localStorage.setItem("wishlist", JSON.stringify(wishList));
+    const loadWishList = async () => {
+      const saved = localStorage.getItem("wishlist");
+      if (!saved) return;
+
+      const savedItems: WishListStorageItem[] = JSON.parse(saved);
+      const products: WishListItem[] = [];
+
+      for (const item of savedItems) {
+        const product = await getProductById(item.id);
+        if (product) {
+          products.push({
+            id: product.id,
+            name: product.name,
+            price: product.price,
+            discount: product.discount,
+            image: product.images[0]?.thumb,
+          });
+        }
+      }
+
+      setWishList(products);
+    };
+
+    loadWishList();
+  }, []);
+
+  // --- Sync wishlist IDs to localStorage ---
+  useEffect(() => {
+    const storageData: WishListStorageItem[] = wishList.map((i) => ({ id: i.id }));
+    localStorage.setItem("wishlist", JSON.stringify(storageData));
   }, [wishList]);
 
+  // --- Add product to wishlist ---
   const addToWishList = async (id: string) => {
     try {
-      const product: Product | null = await getProductById(String(id));
+      if (wishList.some((i) => i.id === id)) {
+        showNotification("Already in wishlist!", "info");
+        return;
+      }
 
+      const product = await getProductById(id);
       if (!product) {
         showNotification("Product not found!", "error");
         return;
@@ -56,15 +88,9 @@ export const WishListProvider: React.FC<{ children: React.ReactNode }> = ({
         name: product.name,
         price: product.price,
         discount: product.discount,
-        image: product.images[0],
+        image: product.images[0]?.thumb,
       };
 
-      const existing = wishList.find((i) => i.id === id);
-
-      if (existing) {
-        showNotification("Already in wishlist!", "info");
-        return;
-      }
       setWishList((prev) => [...prev, newItem]);
       showNotification(`${product.name} added to wishlist!`, "success");
     } catch (err) {
@@ -73,17 +99,15 @@ export const WishListProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
+  // --- Remove product from wishlist ---
   const removeFromWishList = (id: string) => {
     const item = wishList.find((i) => i.id === id);
-    if (item) {
-      showNotification(`${item.name} removed from wishlist`, "error");
-    }
+    if (item) showNotification(`${item.name} removed from wishlist`, "error");
     setWishList((prev) => prev.filter((i) => i.id !== id));
   };
 
-  const isInWishList = (id: string) => {
-    return wishList.some((i) => i.id === id);
-  };
+  // --- Check if product is in wishlist ---
+  const isInWishList = (id: string) => wishList.some((i) => i.id === id);
 
   const totalWishList = wishList.length;
 

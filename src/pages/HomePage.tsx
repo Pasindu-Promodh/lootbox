@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Typography, Button, Box } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { getProducts } from "../data/fetchProducts";
-import ProductSlider from "../components/ProductSlider";
+import ProductSlider from "../components/common/ProductSlider";
 import { useCart } from "../context/CartContext";
 import type { Product } from "../data/products";
 import { keyframes } from "@mui/system";

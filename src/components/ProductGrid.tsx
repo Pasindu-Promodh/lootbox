@@ -1,6 +1,6 @@
 import React from "react";
 import { Box } from "@mui/material";
-import ProductCard from "./ProductCard";
+import ProductCard from "./common/ProductCard";
 import type { Product } from "../data/products";
 import ProductCardSkeleton from "./ProductCardSkeleton";
 

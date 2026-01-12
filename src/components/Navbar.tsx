@@ -79,17 +79,6 @@ const Navbar: React.FC = () => {
           }}
         >
           {/* Logo */}
-          {/* <Box
-            sx={{
-              cursor: "pointer",
-              fontWeight: 600,
-              fontSize: "1.5rem",
-              userSelect: "none",
-            }}
-            onClick={() => navigate("/")}
-          >
-            Pickio
-          </Box> */}
 
           <Box
             onClick={() => navigate("/")}

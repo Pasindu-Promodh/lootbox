@@ -9,10 +9,16 @@ const Row = ({ label, value, bold, error }: any) => (
     mb={1}
     sx={{ opacity: error ? 0.8 : 1 }}
   >
-    <Typography fontWeight={bold ? 700 : 500} color={error ? "error" : "text.primary"}>
+    <Typography
+      fontWeight={bold ? 700 : 500}
+      color={error ? "error" : "text.primary"}
+    >
       {label}
     </Typography>
-    <Typography fontWeight={bold ? 700 : 500} color={error ? "error" : "text.primary"}>
+    <Typography
+      fontWeight={bold ? 700 : 500}
+      color={error ? "error" : "text.primary"}
+    >
       Rs {value}
     </Typography>
   </Box>
@@ -39,8 +45,19 @@ const OrderPriceBreakdown: React.FC<{ order: Order }> = ({ order }) => {
       </Typography>
 
       <Row label="Subtotal" value={order.subtotal.toLocaleString()} />
-      <Row label="Discount" value={`- ${order.discount.toLocaleString()}`} error />
-      <Row label="Discounted Subtotal" value={order.discounted_subtotal.toLocaleString()} />
+      {order.discount > 0 && (
+        <>
+          <Row
+            label="Discount"
+            value={`- ${order.discount.toLocaleString()}`}
+            error
+          />
+          <Row
+            label="Discounted Subtotal"
+            value={order.discounted_subtotal.toLocaleString()}
+          />
+        </>
+      )}
       <Row label="Shipping" value={order.shipping.toLocaleString()} />
 
       <Divider sx={{ my: 2 }} />

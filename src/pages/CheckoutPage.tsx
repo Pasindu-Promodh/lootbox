@@ -21,38 +21,38 @@ import CartItem from "../components/cart/CartItem";
 import { useNavigate } from "react-router-dom";
 import { useNotification } from "../context/NotificationContext";
 
+const districts = [
+  "Colombo",
+  "Gampaha",
+  "Kalutara",
+  "Kandy",
+  "Matale",
+  "Nuwara Eliya",
+  "Galle",
+  "Matara",
+  "Hambantota",
+  "Jaffna",
+  "Kilinochchi",
+  "Mannar",
+  "Vavuniya",
+  "Mullaitivu",
+  "Batticaloa",
+  "Ampara",
+  "Trincomalee",
+  "Kurunegala",
+  "Puttalam",
+  "Anuradhapura",
+  "Polonnaruwa",
+  "Badulla",
+  "Monaragala",
+  "Ratnapura",
+  "Kegalle",
+];
+
 const CheckoutPage: React.FC = () => {
   const navigate = useNavigate();
-  const { cart, total, shipping, clearCart } = useCart();
+  const { cart, total, shipping, clearCart, refreshCart } = useCart();
   const { showNotification } = useNotification();
-
-  const districts = [
-    "Colombo",
-    "Gampaha",
-    "Kalutara",
-    "Kandy",
-    "Matale",
-    "Nuwara Eliya",
-    "Galle",
-    "Matara",
-    "Hambantota",
-    "Jaffna",
-    "Kilinochchi",
-    "Mannar",
-    "Vavuniya",
-    "Mullaitivu",
-    "Batticaloa",
-    "Ampara",
-    "Trincomalee",
-    "Kurunegala",
-    "Puttalam",
-    "Anuradhapura",
-    "Polonnaruwa",
-    "Badulla",
-    "Monaragala",
-    "Ratnapura",
-    "Kegalle",
-  ];
 
   // FORM STATE
   const [form, setForm] = useState({
@@ -73,31 +73,44 @@ const CheckoutPage: React.FC = () => {
 
   const [user, setUser] = useState<User | null>(null);
   const [editable, setEditable] = useState(true); // guest default editable
-
+  const [isPlacingOrder, setIsPlacingOrder] = useState(false);
   // PAYMENT
   const [paymentMethod, setPaymentMethod] = useState("cod");
-  const PARTIAL_DISCOUNT = 0.02;
-  const FULL_DISCOUNT = 0.05;
+  // const PARTIAL_DISCOUNT = 0.02;
+  // const FULL_DISCOUNT = 0.05;
 
   // ---- PRICE CALCULATIONS ---- //
-  const originalTotal = cart.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0
+  const originalTotal = React.useMemo(
+    () => cart.reduce((sum, item) => sum + item.price * item.quantity, 0),
+    [cart]
   );
 
-  const discountTotal = originalTotal - total;
-  const subtotal = originalTotal - discountTotal;
-  const finalTotal = subtotal + shipping;
+  const discountTotal = React.useMemo(
+    () => originalTotal - total,
+    [originalTotal, total]
+  );
+  const subtotal = React.useMemo(
+    () => originalTotal - discountTotal,
+    [originalTotal, discountTotal]
+  );
+  const finalTotal = React.useMemo(
+    () => subtotal + shipping,
+    [subtotal, shipping]
+  );
 
-  const fullDiscountAmount = subtotal * FULL_DISCOUNT;
-  const fullPayAmount = subtotal - fullDiscountAmount + shipping;
+  // const fullDiscountAmount = subtotal * FULL_DISCOUNT;
+  // const fullPayAmount = subtotal - fullDiscountAmount + shipping;
 
-  const partialDiscountAmount = subtotal * PARTIAL_DISCOUNT;
-  const partialPayAmount = subtotal - partialDiscountAmount;
+  // const partialDiscountAmount = subtotal * PARTIAL_DISCOUNT;
+  // const partialPayAmount = subtotal - partialDiscountAmount;
 
   // LOAD PROFILE
   useEffect(() => {
-    loadProfile();
+    const init = async () => {
+      await loadProfile();
+      refreshCart();
+    };
+    init();
   }, []);
 
   const loadProfile = async () => {
@@ -149,9 +162,9 @@ const CheckoutPage: React.FC = () => {
   };
 
   // Generic form handler
-  const handleChange = (field: string, value: any) => {
+  const handleChange = React.useCallback((field: string, value: any) => {
     setForm((prev) => ({ ...prev, [field]: value }));
-  };
+  }, []);
 
   const handleClickProduct = (productId: string) => {
     navigate(`/product/${productId}`);
@@ -162,6 +175,12 @@ const CheckoutPage: React.FC = () => {
     const pattern = /^07\d{8}$/; // strictly 07XXXXXXXX
     return pattern.test(value);
   };
+
+  const arePhonesDifferent = (p1: string, p2: string) => {
+    if (p1 === "" || p2 === "") return true; // only enforce when both filled
+    return p1 !== p2;
+  };
+
   // VALIDATION – all required fields must be filled
   const isFormValid = () => {
     return (
@@ -171,13 +190,17 @@ const CheckoutPage: React.FC = () => {
       form.phone1.trim() !== "" &&
       form.phone2.trim() !== "" &&
       validatePhone(form.phone1) &&
-      validatePhone(form.phone2)
+      validatePhone(form.phone2) &&
+      arePhonesDifferent(form.phone1, form.phone2)
     );
   };
 
   const isGuest = !user;
 
   const placeOrder = async () => {
+    if (isPlacingOrder) return; // prevent double clicks
+    setIsPlacingOrder(true);
+
     try {
       const res = await fetch(
         "https://fdlwfmzzlshcjhsoqftd.supabase.co/functions/v1/create-order",
@@ -208,11 +231,13 @@ const CheckoutPage: React.FC = () => {
       if (!res.ok) throw new Error(data.error || "Unknown error");
       // alert("Order successful!");
       showNotification(`Order successful!`, "success");
-      navigate("/");
       clearCart();
+      navigate("/");
     } catch (err) {
       //alert(`Order failed: ${(err as Error).message}`);
       showNotification(`Order failed: ${(err as Error).message}`, "error");
+    } finally {
+      setIsPlacingOrder(false);
     }
   };
 
@@ -296,7 +321,7 @@ const CheckoutPage: React.FC = () => {
                 labelId="district-label"
                 disabled={!editable}
                 value={form.district}
-                label="District *"
+                label="District"
                 onChange={(e) => handleChange("district", e.target.value)}
                 error={form.district === ""}
               >
@@ -321,7 +346,7 @@ const CheckoutPage: React.FC = () => {
               helperText={
                 form.phone1 !== "" && !validatePhone(form.phone1)
                   ? "Invalid phone number format"
-                  : null
+                  : "Format: 07XXXXXXXX"
               }
               placeholder="07XXXXXXXX"
               sx={{ mb: 2 }}
@@ -333,13 +358,18 @@ const CheckoutPage: React.FC = () => {
               value={form.phone2}
               onChange={(e) => handleChange("phone2", e.target.value)}
               error={
-                (form.phone2 !== "" && !validatePhone(form.phone2)) ||
-                form.phone2 === ""
+                form.phone2 === "" ||
+                !validatePhone(form.phone2) ||
+                !arePhonesDifferent(form.phone1, form.phone2)
               }
               helperText={
-                form.phone2 !== "" && !validatePhone(form.phone2)
+                form.phone2 === ""
+                  ? "Alternative contact number is required"
+                  : !validatePhone(form.phone2)
                   ? "Invalid phone number format"
-                  : null
+                  : !arePhonesDifferent(form.phone1, form.phone2)
+                  ? "Telephone Number 2 must be different from Telephone Number 1"
+                  : "Alternative contact number"
               }
               placeholder="07XXXXXXXX"
               sx={{ mb: 2 }}
@@ -370,18 +400,25 @@ const CheckoutPage: React.FC = () => {
                 <Typography>Subtotal</Typography>
                 <Typography>Rs {originalTotal.toLocaleString()}</Typography>
               </Box>
+              {discountTotal > 0 && (
+                <>
+                  <Box
+                    sx={{ display: "flex", justifyContent: "space-between" }}
+                  >
+                    <Typography>Discount</Typography>
+                    <Typography color="error.main">
+                      - Rs {discountTotal.toLocaleString()}
+                    </Typography>
+                  </Box>
 
-              <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-                <Typography>Discount</Typography>
-                <Typography color="error.main">
-                  - Rs {discountTotal.toLocaleString()}
-                </Typography>
-              </Box>
-
-              <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-                <Typography>Discounted Subtotal</Typography>
-                <Typography>Rs {subtotal.toLocaleString()}</Typography>
-              </Box>
+                  <Box
+                    sx={{ display: "flex", justifyContent: "space-between" }}
+                  >
+                    <Typography>Discounted Subtotal</Typography>
+                    <Typography>Rs {subtotal.toLocaleString()}</Typography>
+                  </Box>
+                </>
+              )}
 
               <Box sx={{ display: "flex", justifyContent: "space-between" }}>
                 <Typography>Shipping</Typography>
@@ -405,16 +442,16 @@ const CheckoutPage: React.FC = () => {
 
             <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
               {[
-                {
-                  key: "full",
-                  title: "Pay Full Amount Online  (5% Discount)",
-                  description: `Pay Rs ${fullPayAmount.toLocaleString()} now.`,
-                },
-                {
-                  key: "partial",
-                  title: "Pay Only Shipping (2% Discount)",
-                  description: `Pay Rs ${shipping.toLocaleString()} now. Remaining: Rs ${partialPayAmount.toLocaleString()}.`,
-                },
+                // {
+                //   key: "full",
+                //   title: "Pay Full Amount Online  (5% Discount)",
+                //   description: `Pay Rs ${fullPayAmount.toLocaleString()} now.`,
+                // },
+                // {
+                //   key: "partial",
+                //   title: "Pay Only Shipping (2% Discount)",
+                //   description: `Pay Rs ${shipping.toLocaleString()} now. Remaining: Rs ${partialPayAmount.toLocaleString()}.`,
+                // },
                 {
                   key: "cod",
                   title: "Cash on Delivery",
@@ -447,20 +484,10 @@ const CheckoutPage: React.FC = () => {
               fullWidth
               size="large"
               sx={{ mt: 2 }}
-              disabled={!isFormValid()}
+              disabled={!isFormValid() || cart.length === 0 || isPlacingOrder}
               onClick={placeOrder}
             >
-              {/* {paymentMethod === "cod" &&
-                `Place Order (Pay Rs ${amountToPayLater.toFixed(
-                  2
-                )} on delivery)`}
-
-              {paymentMethod === "full" &&
-                `Pay Rs ${amountDueNow.toFixed(2)} Now`}
-
-              {paymentMethod === "partial" &&
-                `Pay Rs ${amountDueNow.toFixed(2)} Now`} */}
-              Place Order
+              {isPlacingOrder ? "Placing Order..." : "Place Order"}
             </Button>
           </CardContent>
         </Card>
