@@ -3,7 +3,7 @@ import type { Order } from "../types/order";
 
 export async function getUserOrders(userId: string): Promise<Order[]> {
   const { data, error } = await supabase
-    .from("orders")
+    .from("orders_public")
     .select("*")
     .eq("user_id", userId)
     .order("created_at", { ascending: false });
