@@ -17,9 +17,9 @@ import {
 import { useCart } from "../context/CartContext";
 import { supabase } from "../supabase";
 import type { User } from "@supabase/supabase-js";
-import CartItem from "../components/cart/CartItem";
 import { useNavigate } from "react-router-dom";
 import { useNotification } from "../context/NotificationContext";
+import CartItem from "../components/cart/CartItem";
 
 const districts = [
   "Colombo",

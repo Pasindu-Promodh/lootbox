@@ -1,13 +1,11 @@
 import React from "react";
 import { Box, Typography, IconButton, Button, CardMedia } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
-import {
-  useCart,
-  type CartItem as CartItemType,
-} from "../../context/CartContext";
+import { useCart } from "../../context/CartContext";
+import type { Cart } from "../../types/cart";
 
 interface Props {
-  item: CartItemType;
+  item: Cart;
   onClose?: () => void;
   onClickProduct: (id: string) => void;
 }
@@ -62,7 +60,10 @@ const CartItem: React.FC<Props> = ({ item, onClose, onClickProduct }) => {
             fontWeight={500}
             sx={{ fontSize: "1rem", color: "text.primary" }}
           >
-            Rs {Math.round(item.price * (1 - item.discount / 100)).toLocaleString()}
+            Rs{" "}
+            {Math.round(
+              item.price * (1 - item.discount / 100)
+            ).toLocaleString()}
           </Typography>
 
           {item.discount != 0 && (
@@ -123,7 +124,9 @@ const CartItem: React.FC<Props> = ({ item, onClose, onClickProduct }) => {
             sx={{ fontSize: "1rem", color: "primary.main" }}
           >
             Rs{" "}
-            {(Math.round(item.price * (1 - item.discount / 100)) * item.quantity).toLocaleString()}
+            {(
+              Math.round(item.price * (1 - item.discount / 100)) * item.quantity
+            ).toLocaleString()}
           </Typography>
         </Box>
       </Box>

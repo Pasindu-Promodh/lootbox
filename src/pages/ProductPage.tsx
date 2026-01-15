@@ -12,8 +12,8 @@ import FullscreenViewer from "../components/FullscreenViewer";
 import { useCart } from "../context/CartContext";
 import { useWishList } from "../context/WishListContext";
 
-import { getProductById, getProductsByCategory } from "../data/fetchProducts";
-import type { Product } from "../data/products";
+import { getProductById, getProducts } from "../data/fetchProducts";
+import type { Product } from "../types/product";
 
 export default function ProductPage() {
   const { productId } = useParams();
@@ -32,6 +32,7 @@ export default function ProductPage() {
     ? wishList.some((item) => item.id === product.id)
     : false;
 
+  // Load product on mount or when productId changes
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
     if (productId) loadProduct();
@@ -41,11 +42,15 @@ export default function ProductPage() {
     setLoading(true);
     const prod = await getProductById(productId);
     setProduct(prod);
+
     if (prod) setMainImage(prod.images[0]?.main || "");
 
-    // Fetch related products by category (exclude current product)
+    // Fetch related products by main category, excluding current product
     if (prod) {
-      const related = await getProductsByCategory(prod.category, 10);
+      const related = await getProducts({
+        category: prod.category,
+        limit: 10,
+      });
       setRelatedProducts(related.filter((p) => p.id !== prod.id).slice(0, 10));
     }
 
@@ -57,47 +62,28 @@ export default function ProductPage() {
     setZoomed(false);
   }, [product]);
 
-  // const index = mainImage ? product?.images.indexOf(mainImage) ?? 0 : 0;
   const index = mainImage
-  ? product?.images.findIndex((img) => img.main === mainImage) ?? 0
-  : 0;
-
-  // const goNext = useCallback(
-  //   () =>
-  //     setMainImage(
-  //       product?.images[(index + 1) % (product.images.length || 1)] || ""
-  //     ),
-  //   [index, product]
-  // );
-
-  // const goPrev = useCallback(
-  //   () =>
-  //     setMainImage(
-  //       product?.images[
-  //         (index - 1 + (product?.images.length || 1)) %
-  //           (product?.images.length || 1)
-  //       ] || ""
-  //     ),
-  //   [index, product]
-  // );
+    ? product?.images.findIndex((img) => img.main === mainImage) ?? 0
+    : 0;
 
   const goNext = useCallback(
-  () =>
-    setMainImage(
-      product?.images[(index + 1) % (product.images.length || 1)]?.main || ""
-    ),
-  [index, product]
-);
+    () =>
+      setMainImage(
+        product?.images[(index + 1) % (product.images.length || 1)]?.main || ""
+      ),
+    [index, product]
+  );
 
-const goPrev = useCallback(
-  () =>
-    setMainImage(
-      product?.images[
-        (index - 1 + (product?.images.length || 1)) % (product?.images.length || 1)
-      ]?.main || ""
-    ),
-  [index, product]
-);
+  const goPrev = useCallback(
+    () =>
+      setMainImage(
+        product?.images[
+          (index - 1 + (product.images.length || 1)) %
+            (product.images.length || 1)
+        ]?.main || ""
+      ),
+    [index, product]
+  );
 
   const toggleZoom = () => setZoomed((z) => !z);
 
@@ -190,7 +176,9 @@ const goPrev = useCallback(
                   cursor: "pointer",
                   overflow: "hidden",
                   border:
-                    img.main === mainImage ? "2px solid #1976d2" : "2px solid transparent",
+                    img.main === mainImage
+                      ? "2px solid #1976d2"
+                      : "2px solid transparent",
                 }}
               >
                 <CardMedia
@@ -210,7 +198,8 @@ const goPrev = useCallback(
             variant="subtitle1"
             sx={{ mb: 1, color: "text.secondary" }}
           >
-            Category: {product.category}
+            Category: {product.category}{" "}
+            {product.sub_category && `/ ${product.sub_category}`}
           </Typography>
 
           <Typography variant="body1" sx={{ mb: 2, color: "text.secondary" }}>

@@ -7,7 +7,7 @@ import {
   useTheme,
 } from "@mui/material";
 import ProductCard from "./ProductCard";
-import type { Product } from "../../data/products";
+import type { Product } from "../../types/product";
 import ProductCardSkeleton from "../ProductCardSkeleton";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";

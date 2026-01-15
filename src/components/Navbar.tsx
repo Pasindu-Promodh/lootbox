@@ -30,6 +30,7 @@ import { useCart } from "../context/CartContext";
 import { useWishList } from "../context/WishListContext";
 
 import { useAuth } from "../AuthContext";
+import ShopCategoryDrawer from "./ShopCategoryDrawer";
 
 const Navbar: React.FC = () => {
   const navigate = useNavigate();
@@ -40,6 +41,7 @@ const Navbar: React.FC = () => {
   const { totalCart } = useCart();
   const { totalWishList } = useWishList();
 
+  const [shopOpen, setShopOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
   const [wishListOpen, setWishListOpen] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
@@ -124,10 +126,19 @@ const Navbar: React.FC = () => {
               </IconButton>
 
               {/* Shop */}
-              <IconButton
+              {/* <IconButton
                 color="inherit"
                 onClick={() => navigate("/shop")}
                 aria-label="shop"
+              >
+                <StorefrontIcon />
+              </IconButton> */}
+
+              <IconButton
+                color="inherit"
+                aria-label="shop"
+                onMouseEnter={() => setShopOpen(true)}
+                onClick={() => setShopOpen(true)}
               >
                 <StorefrontIcon />
               </IconButton>
@@ -198,10 +209,19 @@ const Navbar: React.FC = () => {
                 <HomeIcon />
               </IconButton>
 
-              <IconButton
+              {/* <IconButton
                 color="inherit"
                 onClick={() => navigate("/shop")}
                 aria-label="shop"
+              >
+                <StorefrontIcon />
+              </IconButton> */}
+
+              <IconButton
+                color="inherit"
+                aria-label="shop"
+                onMouseEnter={() => setShopOpen(true)}
+                onClick={() => setShopOpen(true)}
               >
                 <StorefrontIcon />
               </IconButton>
@@ -305,6 +325,8 @@ const Navbar: React.FC = () => {
       </Menu>
 
       {/* Drawers */}
+      <ShopCategoryDrawer open={shopOpen} onClose={() => setShopOpen(false)} />
+
       <CartDrawer
         open={cartOpen}
         onClose={() => setCartOpen(false)}

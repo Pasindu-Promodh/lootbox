@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { getProducts } from "../data/fetchProducts";
 import ProductSlider from "../components/common/ProductSlider";
 import { useCart } from "../context/CartContext";
-import type { Product } from "../data/products";
+import type { Product } from "../types/product";
 import { keyframes } from "@mui/system";
 
 const HomePage: React.FC = () => {

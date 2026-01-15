@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState, type FC } from "react";
 import {
   Box,
   Container,
@@ -19,7 +19,7 @@ import { useNavigate } from "react-router-dom";
 import { useNotification } from "../context/NotificationContext";
 import type { User } from "@supabase/supabase-js";
 
-const Profile: React.FC = () => {
+const Profile: FC = () => {
   const navigate = useNavigate();
   const { showNotification } = useNotification();
 

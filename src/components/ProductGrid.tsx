@@ -1,7 +1,7 @@
 import React from "react";
 import { Box } from "@mui/material";
 import ProductCard from "./common/ProductCard";
-import type { Product } from "../data/products";
+import type { Product } from "../types/product";
 import ProductCardSkeleton from "./ProductCardSkeleton";
 
 type Props = {

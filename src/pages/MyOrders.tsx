@@ -15,7 +15,7 @@ import { useNavigate } from "react-router-dom";
 import { useNotification } from "../context/NotificationContext";
 import OrderCard from "../components/orders/OrderCard";
 import type { Order, OrderStatus } from "../types/order";
-import { getUserOrders } from "../data/getOrders";
+import { getUserOrders } from "../data/fetchOrders";
 import { getProductsByIds } from "../data/fetchProducts";
 
 const MyOrders: React.FC = () => {
@@ -34,38 +34,6 @@ const MyOrders: React.FC = () => {
   useEffect(() => {
     loadOrders();
   }, []);
-
-  // const loadOrders = async () => {
-  //   try {
-  //     const {
-  //       data: { session },
-  //     } = await supabase.auth.getSession();
-
-  //     if (!session) {
-  //       showNotification("Please login to view orders", "error");
-  //       navigate("/");
-  //       return;
-  //     }
-
-  //     const orders = await getUserOrders(session.user.id);
-  //     setOrders(orders);
-
-  //     const productIds = Array.from(
-  //       new Set(
-  //         orders.flatMap((o) =>
-  //           o.items.map((i: { product_id: string }) => i.product_id)
-  //         )
-  //       )
-  //     );
-
-  //     const productMap = await getProductsByIds(productIds);
-  //     setProductMap(productMap);
-  //   } catch {
-  //     showNotification("Failed to load orders", "error");
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
 
   const loadOrders = async () => {
     try {
@@ -197,7 +165,6 @@ const MyOrders: React.FC = () => {
             </FormControl>
           </Box>
           {visibleOrders.map((order) => (
-
             <OrderCard
               key={order.id}
               order={order}

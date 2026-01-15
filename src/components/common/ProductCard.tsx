@@ -7,7 +7,7 @@ import {
   Box,
   Skeleton,
 } from "@mui/material";
-import type { Product } from "../../data/products";
+import type { Product } from "../../types/product";
 
 type Props = {
   product: Product;
@@ -105,11 +105,11 @@ const ProductCard: React.FC<Props> = ({
             animation="wave"
             // sx={{ position: "absolute", inset: 0 }}
             sx={{
-            position: "absolute",
-            inset: 0,
-            width: "100%",
-            height: "100%",
-          }}
+              position: "absolute",
+              inset: 0,
+              width: "100%",
+              height: "100%",
+            }}
           />
         )}
         <CardMedia
@@ -152,7 +152,7 @@ const ProductCard: React.FC<Props> = ({
             sx={{
               display: "flex",
               alignItems: "baseline",
-              columnGap:1,
+              columnGap: 1,
               flexWrap: "wrap",
             }}
           >

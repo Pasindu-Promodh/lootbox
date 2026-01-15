@@ -1,21 +1,10 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useNotification } from "./NotificationContext";
 import { getProductById } from "../data/fetchProducts";
-
-export interface WishListItem {
-  id: string;
-  name: string;
-  price: number;
-  discount: number;
-  image?: string;
-}
-
-interface WishListStorageItem {
-  id: string;
-}
+import type { WishList, WishListStorageItem } from "../types/wishlist";
 
 interface WishListContextType {
-  wishList: WishListItem[];
+  wishList: WishList[];
   addToWishList: (id: string) => Promise<void>;
   removeFromWishList: (id: string) => void;
   isInWishList: (id: string) => boolean;
@@ -32,7 +21,7 @@ export const useWishList = () => {
 };
 
 export const WishListProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [wishList, setWishList] = useState<WishListItem[]>([]);
+  const [wishList, setWishList] = useState<WishList[]>([]);
   const { showNotification } = useNotification();
 
   // --- Load wishlist from localStorage and fetch fresh product data ---
@@ -42,7 +31,7 @@ export const WishListProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       if (!saved) return;
 
       const savedItems: WishListStorageItem[] = JSON.parse(saved);
-      const products: WishListItem[] = [];
+      const products: WishList[] = [];
 
       for (const item of savedItems) {
         const product = await getProductById(item.id);
@@ -83,7 +72,7 @@ export const WishListProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         return;
       }
 
-      const newItem: WishListItem = {
+      const newItem: WishList = {
         id: product.id,
         name: product.name,
         price: product.price,

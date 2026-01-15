@@ -3,11 +3,11 @@ import { Box, Typography, IconButton, CardMedia } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import {
   useWishList,
-  type WishListItem as WishListItemType,
 } from "../../context/WishListContext";
+import type { WishList } from "../../types/wishlist";
 
 interface Props {
-  item: WishListItemType;
+  item: WishList;
   onClose: () => void;
   onClickProduct: (id: string) => void;
 }

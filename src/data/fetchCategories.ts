@@ -1,18 +1,16 @@
 import { supabase } from "../supabase";
+import type { Category } from "../types/category";
 
-export async function getCategories(): Promise<string[]> {
+export async function getCategories(): Promise<Category[]> {
   const { data, error } = await supabase
     .from("categories")
-    .select("name");
+    .select("name, subs")
+    .order("sort_order", { ascending: true });
 
   if (error) {
     console.error("Failed to fetch categories:", error);
     return [];
   }
 
-  const categories = Array.from(
-    new Set(data?.map((c) => c.name) ?? [])
-  );
-
-  return ["All", ...categories];
+  return data ?? [];
 }

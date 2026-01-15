@@ -11,7 +11,7 @@ import {
   CircularProgress,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import type { Product } from "../data/products";
+import type { Product } from "../types/product";
 import { searchProducts } from "../data/fetchProducts";
 
 interface ProductSearchProps {
@@ -142,18 +142,29 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
             >
               <Typography
                 variant="body2"
-                fontWeight={600}
-                sx={{ fontSize: "1rem", color: "primary.main" }}
+                fontWeight={500}
+                sx={{ fontSize: "1.1rem", color: "primary.main" }}
               >
-                Rs {p.price}
+                Rs {Math.round(p.price * (1 - p.discount / 100))}
               </Typography>
-
-              {p.discount > 0 && (
+              {p.on_sale && (
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{
+                    textDecoration: "line-through",
+                    fontSize: "0.75rem",
+                  }}
+                >
+                  Rs {p.price}
+                </Typography>
+              )}
+              {p.on_sale && (
                 <Typography
                   variant="body2"
                   color="error"
                   fontWeight={600}
-                  sx={{ fontSize: "0.75rem" }}
+                  sx={{ fontSize: "0.8rem" }}
                 >
                   {p.discount}% OFF
                 </Typography>
@@ -283,7 +294,7 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
                           fontWeight={500}
                           sx={{ fontSize: "1.1rem", color: "primary.main" }}
                         >
-                          Rs {p.price}
+                          Rs {Math.round(p.price * (1 - p.discount / 100))}
                         </Typography>
                         {p.on_sale && (
                           <Typography
@@ -304,7 +315,7 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
                             fontWeight={600}
                             sx={{ fontSize: "0.8rem" }}
                           >
-                            {Math.round(p.price * (1 - p.discount / 100))}% OFF
+                            {p.discount}% OFF
                           </Typography>
                         )}
                       </Box>
