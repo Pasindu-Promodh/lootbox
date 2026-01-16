@@ -10,7 +10,7 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { getCategories} from "../data/fetchCategories";
+import { getCategories } from "../data/fetchCategories";
 import type { Category } from "../types/category";
 
 type Props = {
@@ -33,7 +33,9 @@ const ShopCategoryDrawer = ({ open, onClose }: Props) => {
       setCategories(data);
     };
 
-    loadCategories();
+    if (categories.length === 0) {
+      loadCategories();
+    }
   }, [open]);
 
   const goShopAll = () => {
@@ -48,7 +50,9 @@ const ShopCategoryDrawer = ({ open, onClose }: Props) => {
 
   const goSub = (main: string, sub: string) => {
     navigate(
-      `/shop?category=${encodeURIComponent(main)}&sub_category=${encodeURIComponent(sub)}`
+      `/shop?category=${encodeURIComponent(
+        main
+      )}&sub_category=${encodeURIComponent(sub)}`
     );
     onClose();
   };
@@ -123,7 +127,7 @@ const ShopCategoryDrawer = ({ open, onClose }: Props) => {
 
               {/* Sub categories */}
               <Box sx={{ display: "flex", flexDirection: "column", gap: 0.8 }}>
-                {cat.subs?.map((sub,i) => (
+                {cat.subs?.map((sub, i) => (
                   <Typography
                     key={i}
                     sx={{
