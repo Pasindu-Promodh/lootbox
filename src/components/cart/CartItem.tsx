@@ -60,22 +60,34 @@ const CartItem: React.FC<Props> = ({ item, onClose, onClickProduct }) => {
             fontWeight={500}
             sx={{ fontSize: "1rem", color: "text.primary" }}
           >
-            Rs{" "}
-            {Math.round(
-              item.price * (1 - item.discount / 100)
-            ).toLocaleString()}
+            Rs {item.price}
           </Typography>
 
-          {item.discount != 0 && (
-            <Typography
-              variant="body2"
-              color="text.secondary"
-              sx={{ textDecoration: "line-through", fontSize: "0.75rem" }}
-            >
-              Rs {item.price.toLocaleString()}
-            </Typography>
+          {item.pre_discount_price > item.price && (
+            <>
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{ textDecoration: "line-through", fontSize: "0.75rem" }}
+              >
+                Rs {item.pre_discount_price}
+              </Typography>
+              <Typography
+                variant="body2"
+                color="error"
+                fontWeight={600}
+                sx={{ fontSize: "0.8rem" }}
+              >
+                {Math.round(
+                  ((item.pre_discount_price - item.price) /
+                    item.pre_discount_price) *
+                    100
+                )}
+                % OFF
+              </Typography>
+            </>
           )}
-          {item.discount != 0 && (
+          {/* {item.discount != 0 && (
             <Typography
               variant="body2"
               color="error"
@@ -84,7 +96,7 @@ const CartItem: React.FC<Props> = ({ item, onClose, onClickProduct }) => {
             >
               {item.discount}% OFF
             </Typography>
-          )}
+          )} */}
         </Box>
 
         <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
@@ -123,10 +135,7 @@ const CartItem: React.FC<Props> = ({ item, onClose, onClickProduct }) => {
             fontWeight={500}
             sx={{ fontSize: "1rem", color: "primary.main" }}
           >
-            Rs{" "}
-            {(
-              Math.round(item.price * (1 - item.discount / 100)) * item.quantity
-            ).toLocaleString()}
+            Rs {item.price * item.quantity}
           </Typography>
         </Box>
       </Box>

@@ -145,30 +145,49 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
                 fontWeight={500}
                 sx={{ fontSize: "1.1rem", color: "primary.main" }}
               >
-                Rs {Math.round(p.price * (1 - p.discount / 100))}
+                Rs {p.price}
               </Typography>
-              {p.on_sale && (
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                  sx={{
-                    textDecoration: "line-through",
-                    fontSize: "0.75rem",
-                  }}
-                >
-                  Rs {p.price}
-                </Typography>
+              {p.pre_discount_price > p.price && (
+                <>
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{
+                      textDecoration: "line-through",
+                      fontSize: "0.75rem",
+                    }}
+                  >
+                    Rs {p.pre_discount_price}
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    color="error"
+                    fontWeight={600}
+                    sx={{ fontSize: "0.8rem" }}
+                  >
+                    {Math.round(
+                      ((p.pre_discount_price - p.price) /
+                        p.pre_discount_price) *
+                        100
+                    )}
+                    % OFF
+                  </Typography>
+                </>
               )}
-              {p.on_sale && (
+              {/* {p.on_sale && (
                 <Typography
                   variant="body2"
                   color="error"
                   fontWeight={600}
                   sx={{ fontSize: "0.8rem" }}
                 >
-                  {p.discount}% OFF
+                  {Math.round(
+                    ((p.pre_discount_price - p.price) / p.pre_discount_price) *
+                      100
+                  )}
+                  % OFF
                 </Typography>
-              )}
+              )} */}
             </Box>
           </CardContent>
         </Card>
@@ -294,21 +313,36 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
                           fontWeight={500}
                           sx={{ fontSize: "1.1rem", color: "primary.main" }}
                         >
-                          Rs {Math.round(p.price * (1 - p.discount / 100))}
+                          Rs {p.price}
                         </Typography>
-                        {p.on_sale && (
-                          <Typography
-                            variant="body2"
-                            color="text.secondary"
-                            sx={{
-                              textDecoration: "line-through",
-                              fontSize: "0.75rem",
-                            }}
-                          >
-                            Rs {p.price}
-                          </Typography>
+                        {p.pre_discount_price > p.price && (
+                          <>
+                            <Typography
+                              variant="body2"
+                              color="text.secondary"
+                              sx={{
+                                textDecoration: "line-through",
+                                fontSize: "0.75rem",
+                              }}
+                            >
+                              Rs {p.pre_discount_price}
+                            </Typography>
+                            <Typography
+                              variant="body2"
+                              color="error"
+                              fontWeight={600}
+                              sx={{ fontSize: "0.8rem" }}
+                            >
+                              {Math.round(
+                                ((p.pre_discount_price - p.price) /
+                                  p.pre_discount_price) *
+                                  100
+                              )}
+                              % OFF
+                            </Typography>
+                          </>
                         )}
-                        {p.on_sale && (
+                        {/* {p.on_sale && (
                           <Typography
                             variant="body2"
                             color="error"
@@ -317,7 +351,7 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
                           >
                             {p.discount}% OFF
                           </Typography>
-                        )}
+                        )} */}
                       </Box>
                     </CardContent>
                   </Card>

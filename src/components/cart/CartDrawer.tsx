@@ -28,7 +28,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ open, onClose, onClickProduct }
 
   // Calculate original total (before discount)
   const originalTotal = cart.reduce(
-    (sum, item) => sum + item.price * item.quantity,
+    (sum, item) => sum + item.pre_discount_price * item.quantity,
     0
   );
 

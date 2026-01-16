@@ -81,7 +81,7 @@ const CheckoutPage: React.FC = () => {
 
   // ---- PRICE CALCULATIONS ---- //
   const originalTotal = React.useMemo(
-    () => cart.reduce((sum, item) => sum + item.price * item.quantity, 0),
+    () => cart.reduce((sum, item) => sum + item.pre_discount_price * item.quantity, 0),
     [cart]
   );
 

@@ -22,7 +22,7 @@ export async function getProducts({
 } = {}): Promise<Product[]> {
   let query = supabase
     .from("products_public")
-    .select("id, name, images, price, discount, in_stock, on_sale")
+    .select("id, name, images, pre_discount_price, price, in_stock, on_sale")
     // .select("*")
     .range(offset, offset + limit - 1);
 
@@ -88,8 +88,8 @@ export async function getProductsByIds(
       images: p.images || [],
       category: p.category,
       sub_category: p.sub_category,
+      pre_discount_price: Number(p.pre_discount_price),
       price: Number(p.price),
-      discount: Number(p.discount),
       featured: p.featured,
       in_stock: p.in_stock,
       on_sale: p.on_sale,
@@ -110,7 +110,7 @@ export async function searchProducts(
 
   const { data, error } = await supabase
     .from("products_public")
-    .select("id, name, images, price, discount, on_sale")
+    .select("id, name, images, pre_discount_price, price")
     .or(
       `name.ilike.%${keyword}%,description.ilike.%${keyword}%,category.ilike.%${keyword}%,sub_category.ilike.%${keyword}%`
     )

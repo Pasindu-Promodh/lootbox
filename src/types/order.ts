@@ -1,8 +1,8 @@
 export interface OrderItem {
   product_id: string;
   qty: number;
+  pre_discount_price: number;
   price: number;
-  discount: number;
 }
 
 export type OrderStatus =
@@ -22,9 +22,9 @@ export interface Order {
   id: string;
   created_at: string;
 
+  pre_discount_subtotal: number;
   subtotal: number;
   discount: number;
-  discounted_subtotal: number;
   shipping: number;
   total: number;
   status_log: OrderStatusLog[];

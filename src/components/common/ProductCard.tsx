@@ -163,14 +163,12 @@ const ProductCard: React.FC<Props> = ({
               fontWeight={500}
               sx={{ fontSize: fontSizes.price ?? "1.2rem" }}
             >
-              Rs{" "}
-              {Math.round(
-                product.price * (1 - product.discount / 100)
-              ).toLocaleString()}
+              Rs {product.price}
             </Typography>
 
             {/* Old price inline on desktop only */}
             {product.on_sale && (
+              <>
               <Typography
                 variant="body2"
                 color="text.secondary"
@@ -180,21 +178,40 @@ const ProductCard: React.FC<Props> = ({
                   display: { xs: "none", sm: "block" },
                 }}
               >
-                Rs {Math.round(product.price).toLocaleString()}
+                Rs {product.pre_discount_price}
               </Typography>
-            )}
-
-            {/* Discount always next to new price */}
-            {product.on_sale && (
               <Typography
                 variant="body2"
                 color="error"
                 fontWeight={600}
                 sx={{ fontSize: "0.8rem" }}
               >
-                {product.discount}% OFF
+                {Math.round(
+                  ((product.pre_discount_price - product.price) /
+                    product.pre_discount_price) *
+                    100
+                )}
+                % OFF
               </Typography>
+              </>
             )}
+
+            {/* Discount always next to new price */}
+            {/* {product.on_sale && (
+              <Typography
+                variant="body2"
+                color="error"
+                fontWeight={600}
+                sx={{ fontSize: "0.8rem" }}
+              >
+                {Math.round(
+                  ((product.pre_discount_price - product.price) /
+                    product.pre_discount_price) *
+                    100
+                )}
+                % OFF
+              </Typography>
+            )} */}
           </Box>
 
           {/* Old price below new price on mobile only */}
@@ -208,7 +225,7 @@ const ProductCard: React.FC<Props> = ({
                 display: { xs: "block", sm: "none" },
               }}
             >
-              Rs {Math.round(product.price).toLocaleString()}
+              Rs {product.pre_discount_price}
             </Typography>
           )}
         </Box>

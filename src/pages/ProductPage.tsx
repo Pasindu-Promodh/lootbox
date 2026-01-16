@@ -208,7 +208,7 @@ export default function ProductPage() {
 
           <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
             <Typography variant="h5" color="primary" fontWeight={700}>
-              Rs {Math.round(product.price * (1 - product.discount / 100))}
+              Rs {product.price}
             </Typography>
             {product.on_sale && (
               <>
@@ -216,10 +216,14 @@ export default function ProductPage() {
                   variant="body1"
                   sx={{ textDecoration: "line-through", opacity: 0.6 }}
                 >
-                  Rs {product.price}
+                  Rs {product.pre_discount_price}
                 </Typography>
                 <Typography color="error" fontWeight={600}>
-                  Save {product.discount}%
+                  Save {Math.round(
+                  ((product.pre_discount_price - product.price) /
+                    product.pre_discount_price) *
+                    100
+                )}%
                 </Typography>
               </>
             )}

@@ -1,9 +1,7 @@
 import React from "react";
 import { Box, Typography, IconButton, CardMedia } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
-import {
-  useWishList,
-} from "../../context/WishListContext";
+import { useWishList } from "../../context/WishListContext";
 import type { WishList } from "../../types/wishlist";
 
 interface Props {
@@ -51,26 +49,47 @@ const WishListItem: React.FC<Props> = ({ item, onClose, onClickProduct }) => {
         >
           {item.name}
         </Typography>
-        <Box sx={{ display: "flex", gap: 1, alignItems: "center"
-          // , mt: 0.3 
-          }}>
+        <Box
+          sx={{
+            display: "flex",
+            gap: 1,
+            alignItems: "center",
+            // , mt: 0.3
+          }}
+        >
           <Typography
             variant="body2"
             fontWeight={500}
             sx={{ fontSize: "1rem", color: "primary.main" }}
           >
-            Rs {Math.round(item.price * (1 - item.discount / 100)).toLocaleString()}
+            Rs {item.price}
           </Typography>
-          {item.discount != 0 && (
-            <Typography
-              variant="body2"
-              color="text.secondary"
-              sx={{ textDecoration: "line-through", fontSize: "0.75rem" }}
-            >
-              Rs {item.price.toLocaleString()}
-            </Typography>
+          {item.pre_discount_price > item.price && (
+            <>
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{ textDecoration: "line-through", fontSize: "0.75rem" }}
+              >
+                Rs {item.pre_discount_price}
+              </Typography>
+
+              <Typography
+                variant="body2"
+                color="error"
+                fontWeight={600}
+                sx={{ fontSize: "0.8rem" }}
+              >
+                {Math.round(
+                  ((item.pre_discount_price - item.price) /
+                    item.pre_discount_price) *
+                    100
+                )}
+                % OFF
+              </Typography>
+            </>
           )}
-          {item.discount != 0 && (
+          {/* {item.discount != 0 && (
             <Typography
               variant="body2"
               color="error"
@@ -79,7 +98,7 @@ const WishListItem: React.FC<Props> = ({ item, onClose, onClickProduct }) => {
             >
               {item.discount}% OFF
             </Typography>
-          )}
+          )} */}
         </Box>
       </Box>
 

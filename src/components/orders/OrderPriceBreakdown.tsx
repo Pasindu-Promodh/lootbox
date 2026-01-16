@@ -44,7 +44,7 @@ const OrderPriceBreakdown: React.FC<{ order: Order }> = ({ order }) => {
         Price Breakdown
       </Typography>
 
-      <Row label="Subtotal" value={order.subtotal.toLocaleString()} />
+      <Row label="Subtotal" value={order.pre_discount_subtotal.toLocaleString()} />
       {order.discount > 0 && (
         <>
           <Row
@@ -54,7 +54,7 @@ const OrderPriceBreakdown: React.FC<{ order: Order }> = ({ order }) => {
           />
           <Row
             label="Discounted Subtotal"
-            value={order.discounted_subtotal.toLocaleString()}
+            value={order.subtotal.toLocaleString()}
           />
         </>
       )}

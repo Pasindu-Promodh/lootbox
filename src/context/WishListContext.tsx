@@ -39,8 +39,8 @@ export const WishListProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           products.push({
             id: product.id,
             name: product.name,
+            pre_discount_price: product.pre_discount_price,
             price: product.price,
-            discount: product.discount,
             image: product.images[0]?.thumb,
           });
         }
@@ -75,8 +75,8 @@ export const WishListProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       const newItem: WishList = {
         id: product.id,
         name: product.name,
+        pre_discount_price: product.pre_discount_price,
         price: product.price,
-        discount: product.discount,
         image: product.images[0]?.thumb,
       };
 

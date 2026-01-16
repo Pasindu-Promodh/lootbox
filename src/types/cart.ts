@@ -1,8 +1,8 @@
 export interface Cart {
   id: string;
   name: string;
+  pre_discount_price: number; 
   price: number;
-  discount: number;
   quantity: number;
   image?: string;
 }

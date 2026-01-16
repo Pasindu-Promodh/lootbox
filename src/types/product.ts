@@ -10,11 +10,11 @@ export type Product = {
   images: ProductImage[];
   category?: string;
   sub_category?: string;
+  pre_discount_price: number;
   price: number;
-  discount: number;
   featured?: boolean;
   in_stock?: boolean;
-  on_sale: boolean;
+  on_sale?: boolean;
   sold_count?: number;
   added_date?: string;
 };
