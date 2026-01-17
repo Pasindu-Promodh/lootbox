@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Typography, IconButton, Button, CardMedia } from "@mui/material";
+import { Box, Typography, IconButton, CardMedia } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useCart } from "../../context/CartContext";
 import type { Cart } from "../../types/cart";
@@ -11,11 +11,11 @@ interface Props {
 }
 
 const CartItem: React.FC<Props> = ({ item, onClose, onClickProduct }) => {
-  const { removeFromCart, updateQty } = useCart();
+  const { removeFromCart } = useCart();
 
-  const handleIncrease = () => updateQty(item.id, item.quantity + 1);
-  const handleDecrease = () =>
-    updateQty(item.id, Math.max(item.quantity - 1, 1));
+  // const handleIncrease = () => updateQty(item.id, item.quantity + 1);
+  // const handleDecrease = () =>
+  //   updateQty(item.id, Math.max(item.quantity - 1, 1));
 
   return (
     <Box
@@ -99,7 +99,7 @@ const CartItem: React.FC<Props> = ({ item, onClose, onClickProduct }) => {
           )} */}
         </Box>
 
-        <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+        {/* <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
           <Button
             variant="outlined"
             size="small"
@@ -137,7 +137,7 @@ const CartItem: React.FC<Props> = ({ item, onClose, onClickProduct }) => {
           >
             Rs {item.price * item.quantity}
           </Typography>
-        </Box>
+        </Box> */}
       </Box>
 
       <IconButton

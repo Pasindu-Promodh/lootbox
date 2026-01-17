@@ -32,6 +32,7 @@ import { useWishList } from "../context/WishListContext";
 import { useAuth } from "../AuthContext";
 import ShopCategoryDrawer from "./ShopCategoryDrawer";
 
+
 const Navbar: React.FC = () => {
   const navigate = useNavigate();
   const theme = useTheme();
@@ -71,7 +72,7 @@ const Navbar: React.FC = () => {
 
   return (
     <>
-      <AppBar position="sticky">
+      <AppBar position="sticky" >
         <Toolbar
           sx={{
             display: "flex",
@@ -325,7 +326,7 @@ const Navbar: React.FC = () => {
       </Menu>
 
       {/* Drawers */}
-      <ShopCategoryDrawer open={shopOpen} onClose={() => setShopOpen(false)} />
+      <ShopCategoryDrawer  open={shopOpen} onClose={() => setShopOpen(false)} />
 
       <CartDrawer
         open={cartOpen}

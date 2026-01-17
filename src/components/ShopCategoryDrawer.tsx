@@ -58,7 +58,11 @@ const ShopCategoryDrawer = ({ open, onClose }: Props) => {
   };
 
   return (
-    <Drawer anchor="top" open={open} onClose={onClose}>
+    <Drawer
+      anchor="top"
+      open={open}
+      onClose={onClose}
+    >
       <Box
         onMouseLeave={() => {
           if (!isMobile) onClose();

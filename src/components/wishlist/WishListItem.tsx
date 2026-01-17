@@ -52,9 +52,8 @@ const WishListItem: React.FC<Props> = ({ item, onClose, onClickProduct }) => {
         <Box
           sx={{
             display: "flex",
-            gap: 1,
             alignItems: "center",
-            // , mt: 0.3
+            gap: 1,
           }}
         >
           <Typography

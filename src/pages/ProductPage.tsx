@@ -229,9 +229,9 @@ export default function ProductPage() {
             )}
           </Box>
 
-          <Box sx={{ mb: 2 }}>
+          <Box sx={{ mb: 2, display: "flex", alignItems: "center", gap: 1 }}>
             <Typography variant="body1" fontWeight={600}>
-              Delivery Date:
+              Delivery Time:
             </Typography>
             <Typography variant="body2" sx={{ color: "text.secondary" }}>
               1 – 5 Working Days
@@ -250,7 +250,7 @@ export default function ProductPage() {
             }}
           >
             <Typography variant="body2">
-              ✔ Cash on Delivery Available
+              ✔ Cash on Delivery
             </Typography>
           </Box>
 

@@ -47,6 +47,10 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
 
   // --- Add item to cart ---
   const addToCart = async (id: string, quantity: number = 1) => {
+    if(cart.length >= 1) {
+      showNotification("Cart limit reached (1 items)!", "error");
+      return;
+    }
     try {
       const product = await getProductById(id);
       if (!product) {

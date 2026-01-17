@@ -20,11 +20,15 @@ interface CartDrawerProps {
   onClickProduct: (id: string) => void;
 }
 
-const CartDrawer: React.FC<CartDrawerProps> = ({ open, onClose, onClickProduct }) => {
+const CartDrawer: React.FC<CartDrawerProps> = ({
+  open,
+  onClose,
+  onClickProduct,
+}) => {
   const { cart, total, shipping } = useCart();
   const navigate = useNavigate();
   const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   // Calculate original total (before discount)
   const originalTotal = cart.reduce(
@@ -77,7 +81,14 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ open, onClose, onClickProduct }
             Your cart is empty
           </Typography>
         ) : (
-          cart.map((item) => <CartItem key={item.id} item={item}  onClose={onClose} onClickProduct={onClickProduct} />)
+          cart.map((item) => (
+            <CartItem
+              key={item.id}
+              item={item}
+              onClose={onClose}
+              onClickProduct={onClickProduct}
+            />
+          ))
         )}
       </Box>
 
@@ -105,35 +116,34 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ open, onClose, onClickProduct }
           {/* Discount */}
           {discountTotal > 0 && (
             <>
-            <Typography
-              variant="body2"
-              color="error"
-              sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                fontWeight: 600,
-              }}
-            >
-              <span>Discount</span>
-              <span>- Rs {discountTotal.toLocaleString()}</span>
-            </Typography>
-          
+              <Typography
+                variant="body2"
+                color="error"
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  fontWeight: 600,
+                }}
+              >
+                <span>Discount</span>
+                <span>- Rs {discountTotal.toLocaleString()}</span>
+              </Typography>
 
-          {/* Price After Discount */}
-          <Typography
-            variant="body2"
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              fontWeight: 500,
-              mt: 1,
-            }}
-          >
-            <span>Discounted Subtotal</span>
-            <span>Rs {total.toLocaleString()}</span>
-          </Typography>
-          </>
-)}
+              {/* Price After Discount */}
+              <Typography
+                variant="body2"
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  fontWeight: 500,
+                  mt: 1,
+                }}
+              >
+                <span>Discounted Subtotal</span>
+                <span>Rs {total.toLocaleString()}</span>
+              </Typography>
+            </>
+          )}
           {/* Shipping */}
           <Typography
             variant="body2"
