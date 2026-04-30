@@ -1,5 +1,13 @@
 import React from "react";
-import { Box, Typography, IconButton, CardMedia } from "@mui/material";
+import {
+  Box,
+  Typography,
+  IconButton,
+  CardMedia,
+  Tooltip,
+  useTheme,
+  useMediaQuery,
+} from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useWishList } from "../../context/WishListContext";
 import type { WishList } from "../../types/wishlist";
@@ -12,6 +20,8 @@ interface Props {
 
 const WishListItem: React.FC<Props> = ({ item, onClose, onClickProduct }) => {
   const { removeFromWishList } = useWishList();
+  const theme = useTheme();
+  const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
 
   return (
     <Box
@@ -41,14 +51,16 @@ const WishListItem: React.FC<Props> = ({ item, onClose, onClickProduct }) => {
       )}
 
       <Box sx={{ flex: 1 }}>
-        <Typography
-          variant="body2"
-          fontWeight={500}
-          noWrap
-          sx={{ fontSize: "0.9rem" }}
-        >
-          {item.name}
-        </Typography>
+        <Tooltip title={item.name}>
+          <Typography
+            variant="body2"
+            fontWeight={500}
+            noWrap
+            sx={{ fontSize: "0.9rem", maxWidth: isDesktop ? "10vw" : "50vw" }}
+          >
+            {item.name}
+          </Typography>
+        </Tooltip>
         <Box
           sx={{
             display: "flex",
@@ -82,7 +94,7 @@ const WishListItem: React.FC<Props> = ({ item, onClose, onClickProduct }) => {
                 {Math.round(
                   ((item.pre_discount_price - item.price) /
                     item.pre_discount_price) *
-                    100
+                    100,
                 )}
                 % OFF
               </Typography>

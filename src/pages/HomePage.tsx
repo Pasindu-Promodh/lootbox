@@ -1,5 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { Typography, Button, Box } from "@mui/material";
+import {
+  Typography,
+  Button,
+  Box,
+  useTheme,
+  useMediaQuery,
+} from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { getProducts } from "../data/fetchProducts";
 import ProductSlider from "../components/common/ProductSlider";
@@ -10,6 +16,9 @@ import { keyframes } from "@mui/system";
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
   const { addToCart } = useCart();
+
+  const theme = useTheme();
+  const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
 
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
   const [bestSellers, setBestSellers] = useState<Product[]>([]);
@@ -113,8 +122,9 @@ const HomePage: React.FC = () => {
 
       <Box
         sx={{
-          backgroundImage:
-            "url(https://placehold.co/1200x400?text=Pickio&bg=555&fg=fff)",
+          // backgroundImage:
+          //   "url(https://placehold.co/1200x400?text=Pickio&bg=555&fg=fff)",
+          backgroundImage: isDesktop ? "url(/lootbox/bg.png)" : "url(/lootbox/bg-mobile.png)",
           backgroundSize: "cover",
           backgroundPosition: "center",
           color: "#fff",

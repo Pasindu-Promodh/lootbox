@@ -79,8 +79,6 @@ const WishListDrawer: React.FC<WishListDrawerProps> = ({
           ))
         )}
       </Box>
-
-      <Divider />
     </Drawer>
   );
 };

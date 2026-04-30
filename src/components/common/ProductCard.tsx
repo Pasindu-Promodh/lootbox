@@ -135,7 +135,7 @@ const ProductCard: React.FC<Props> = ({
           variant="subtitle1"
           fontWeight={500}
           gutterBottom
-          noWrap
+          // noWrap
           sx={{ fontSize: fontSizes.name ?? "0.9rem" }}
         >
           {product.name}

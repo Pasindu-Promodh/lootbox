@@ -1,5 +1,13 @@
 import React from "react";
-import { Box, Typography, IconButton, CardMedia } from "@mui/material";
+import {
+  Box,
+  Typography,
+  IconButton,
+  CardMedia,
+  Tooltip,
+  useMediaQuery,
+  useTheme,
+} from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useCart } from "../../context/CartContext";
 import type { Cart } from "../../types/cart";
@@ -8,10 +16,14 @@ interface Props {
   item: Cart;
   onClose?: () => void;
   onClickProduct: (id: string) => void;
+  checkoutMode?: boolean;
 }
 
-const CartItem: React.FC<Props> = ({ item, onClose, onClickProduct }) => {
+const CartItem: React.FC<Props> = ({ item, onClose, onClickProduct, checkoutMode }) => {
   const { removeFromCart } = useCart();
+
+  const theme = useTheme();
+  const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
 
   // const handleIncrease = () => updateQty(item.id, item.quantity + 1);
   // const handleDecrease = () =>
@@ -45,20 +57,22 @@ const CartItem: React.FC<Props> = ({ item, onClose, onClickProduct }) => {
       )}
 
       <Box sx={{ flex: 1 }}>
-        <Typography
-          variant="body2"
-          fontWeight={500}
-          noWrap
-          sx={{ fontSize: "0.9rem" }}
-        >
-          {item.name}
-        </Typography>
+        <Tooltip title={item.name}>
+          <Typography
+            variant="body2"
+            fontWeight={500}
+            noWrap
+            sx={{ fontSize: "0.9rem", maxWidth: checkoutMode ? (isDesktop ? "10vw" : "40vw") : isDesktop ? "10vw" : "50vw" }}
+          >
+            {item.name}
+          </Typography>
+        </Tooltip>
 
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           <Typography
             variant="body2"
             fontWeight={500}
-            sx={{ fontSize: "1rem", color: "text.primary" }}
+            sx={{ fontSize: "1rem", color: "primary.main" }}
           >
             Rs {item.price}
           </Typography>
@@ -81,7 +95,7 @@ const CartItem: React.FC<Props> = ({ item, onClose, onClickProduct }) => {
                 {Math.round(
                   ((item.pre_discount_price - item.price) /
                     item.pre_discount_price) *
-                    100
+                    100,
                 )}
                 % OFF
               </Typography>
