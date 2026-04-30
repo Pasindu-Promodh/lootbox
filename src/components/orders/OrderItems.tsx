@@ -1,6 +1,5 @@
-import { Box, Tooltip, Typography, useMediaQuery } from "@mui/material";
+import { Box, Tooltip, Typography } from "@mui/material";
 import type { OrderItem } from "../../types/order";
-import { useTheme } from "@mui/material/styles";
 
 interface Props {
   items: OrderItem[];
@@ -9,8 +8,7 @@ interface Props {
 }
 
 const OrderItems: React.FC<Props> = ({ items, productMap, onClickProduct }) => {
-  const theme = useTheme();
-  const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
+ 
   return (
     <>
       {items.map((item, i) => {
@@ -45,18 +43,40 @@ const OrderItems: React.FC<Props> = ({ items, productMap, onClickProduct }) => {
               />
             )}
 
-            <Box sx={{ flex: 1 }}>
+            {/* <Box sx={{ flex: 1 }}> */}
+            <Box
+              sx={{
+                flexGrow: 1,
+                py: 0.5,
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "space-between",
+                minHeight: 80,
+                overflow: "hidden",
+              }}
+            >
               <Tooltip title={product?.name ?? "Product"}>
-              <Typography fontWeight={600} noWrap sx={{maxWidth: isDesktop ? "50vw" : "25vw" }}>
-                {product?.name ?? "Product"}
-              </Typography>
+                <Typography
+                  variant="body2"
+                  fontWeight={600}
+                  // noWrap sx={{maxWidth: isDesktop ? "50vw" : "25vw" }}
+                  sx={{
+                    fontSize: "0.9rem",
+                    display: "-webkit-box",
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: "vertical",
+                    overflow: "hidden",
+                  }}
+                >
+                  {product?.name ?? "Product"}
+                </Typography>
               </Tooltip>
               <Typography variant="body2" color="text.secondary">
                 Qty: {item.qty} × Rs {item.price.toLocaleString()}
               </Typography>
             </Box>
 
-            <Typography fontWeight={600}>
+            <Typography fontWeight={600} sx={{ whiteSpace: "nowrap" }}>
               Rs {(item.qty * item.price).toLocaleString()}
             </Typography>
           </Box>

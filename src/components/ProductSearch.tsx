@@ -9,6 +9,7 @@ import {
   Typography,
   ClickAwayListener,
   CircularProgress,
+  Tooltip,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import type { Product } from "../types/product";
@@ -71,7 +72,7 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
       } finally {
         setLoading(false);
       }
-    }, 500)
+    }, 500),
   ).current;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -88,7 +89,7 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
         left: 0,
         right: 0,
         zIndex: 11,
-        maxHeight: 300,
+        maxHeight: 500,
         overflowY: "auto",
         mt: 0.5,
         p: 1,
@@ -127,15 +128,17 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
             sx={{ width: 80, height: 80, objectFit: "cover", borderRadius: 1 }}
           />
 
-          <CardContent sx={{ flexGrow: 1, py: 0.5, px: 1 }}>
-            <Typography
-              variant="body2"
-              fontWeight={500}
-              noWrap
-              sx={{ fontSize: "0.9rem" }}
-            >
-              {p.name}
-            </Typography>
+          <CardContent sx={{ flexGrow: 1, py: 0.5, px: 1,display: "flex", flexDirection: "column", justifyContent: "space-between", height: 80 }}>
+            <Tooltip title={p.name}>
+              <Typography
+                variant="body2"
+                fontWeight={500}
+                // noWrap
+                sx={{ fontSize: "0.9rem" }}
+              >
+                {p.name}
+              </Typography>
+            </Tooltip>
 
             <Box
               sx={{ display: "flex", gap: 1, alignItems: "center", mt: 0.3 }}
@@ -168,7 +171,7 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
                     {Math.round(
                       ((p.pre_discount_price - p.price) /
                         p.pre_discount_price) *
-                        100
+                        100,
                     )}
                     % OFF
                   </Typography>
@@ -288,11 +291,11 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
                         borderRadius: 1,
                       }}
                     />
-                    <CardContent sx={{ flexGrow: 1, py: 0.5, px: 1 }}>
+                    <CardContent sx={{ flexGrow: 1, py: 0.5, px: 1,display: "flex", flexDirection: "column", justifyContent: "space-between", height: 80 }}>
                       <Typography
                         variant="body2"
                         fontWeight={500}
-                        noWrap
+                        // noWrap
                         sx={{ fontSize: "0.9rem" }}
                       >
                         {p.name}
@@ -336,7 +339,7 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
                               {Math.round(
                                 ((p.pre_discount_price - p.price) /
                                   p.pre_discount_price) *
-                                  100
+                                  100,
                               )}
                               % OFF
                             </Typography>

@@ -5,8 +5,6 @@ import {
   IconButton,
   CardMedia,
   Tooltip,
-  useTheme,
-  useMediaQuery,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useWishList } from "../../context/WishListContext";
@@ -20,8 +18,6 @@ interface Props {
 
 const WishListItem: React.FC<Props> = ({ item, onClose, onClickProduct }) => {
   const { removeFromWishList } = useWishList();
-  const theme = useTheme();
-  const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
 
   return (
     <Box
@@ -50,13 +46,31 @@ const WishListItem: React.FC<Props> = ({ item, onClose, onClickProduct }) => {
         />
       )}
 
-      <Box sx={{ flex: 1 }}>
+      {/* <Box sx={{ flex: 1 }}> */}
+      <Box
+        sx={{
+          flexGrow: 1,
+          py: 0.5,
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "space-between",
+          minHeight: 80,
+          overflow: "hidden",
+        }}
+      >
         <Tooltip title={item.name}>
           <Typography
             variant="body2"
             fontWeight={500}
-            noWrap
-            sx={{ fontSize: "0.9rem", maxWidth: isDesktop ? "10vw" : "50vw" }}
+            // noWrap
+            // sx={{ fontSize: "0.9rem", maxWidth: isDesktop ? "10vw" : "50vw" }}
+            sx={{
+              fontSize: "0.9rem",
+              display: "-webkit-box",
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: "vertical",
+              overflow: "hidden",
+            }}
           >
             {item.name}
           </Typography>

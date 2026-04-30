@@ -5,8 +5,6 @@ import {
   IconButton,
   CardMedia,
   Tooltip,
-  useMediaQuery,
-  useTheme,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useCart } from "../../context/CartContext";
@@ -16,14 +14,14 @@ interface Props {
   item: Cart;
   onClose?: () => void;
   onClickProduct: (id: string) => void;
-  checkoutMode?: boolean;
 }
 
-const CartItem: React.FC<Props> = ({ item, onClose, onClickProduct, checkoutMode }) => {
+const CartItem: React.FC<Props> = ({
+  item,
+  onClose,
+  onClickProduct,
+}) => {
   const { removeFromCart } = useCart();
-
-  const theme = useTheme();
-  const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
 
   // const handleIncrease = () => updateQty(item.id, item.quantity + 1);
   // const handleDecrease = () =>
@@ -56,13 +54,33 @@ const CartItem: React.FC<Props> = ({ item, onClose, onClickProduct, checkoutMode
         />
       )}
 
-      <Box sx={{ flex: 1 }}>
+      {/* <Box sx={{ flex: 1 }}> */}
+      {/* <Box sx={{ flexGrow: 1,py: 0.5, display: "flex", flexDirection: "column", justifyContent: "space-between", height: 80 }}> */}
+      <Box
+        sx={{
+          flexGrow: 1,
+          py: 0.5,
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "space-between",
+          minHeight: 80,
+          overflow: "hidden",
+        }}
+      >
         <Tooltip title={item.name}>
           <Typography
             variant="body2"
             fontWeight={500}
-            noWrap
-            sx={{ fontSize: "0.9rem", maxWidth: checkoutMode ? (isDesktop ? "10vw" : "40vw") : isDesktop ? "10vw" : "50vw" }}
+            // noWrap
+            // sx={{ fontSize: "0.9rem", maxWidth: checkoutMode ? (isDesktop ? "10vw" : "40vw") : isDesktop ? "10vw" : "50vw" }}
+            // sx={{ fontSize: "0.9rem"}}
+            sx={{
+              fontSize: "0.9rem",
+              display: "-webkit-box",
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: "vertical",
+              overflow: "hidden",
+            }}
           >
             {item.name}
           </Typography>

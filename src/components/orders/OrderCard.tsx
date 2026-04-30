@@ -181,7 +181,7 @@ const OrderCard: React.FC<Props> = ({
             </Typography>
           </AccordionSummary>
 
-          <AccordionDetails sx={{ px: 2, py: 1 }}>
+          <AccordionDetails sx={{ px: 0, py: 1 }}>
             <Divider sx={{ mb: 2 }} />
             <OrderDetails order={order} />
             <Divider sx={{ my: 2 }} />

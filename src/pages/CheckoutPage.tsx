@@ -389,7 +389,6 @@ const CheckoutPage: React.FC = () => {
                 key={item.id}
                 item={item}
                 onClickProduct={handleClickProduct}
-                checkoutMode
               />
             ))}
 
