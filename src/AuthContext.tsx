@@ -44,7 +44,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `https://pasindu-promodh.github.io/lootbox/`,
+          redirectTo: `https://pickio.lk`,
+          // redirectTo: `https://pasindu-promodh.github.io/lootbox/`,
           // redirectTo: `http://localhost:5173`,
           queryParams: {
             // access_type: 'offline',
@@ -79,7 +80,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       if (error) {
         console.warn(
           "Sign-out attempted without valid session. Ignoring.",
-          error.message
+          error.message,
         );
       }
 
