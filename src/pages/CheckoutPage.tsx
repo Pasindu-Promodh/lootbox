@@ -203,7 +203,7 @@ const CheckoutPage: React.FC = () => {
 
     try {
       const res = await fetch(
-        "https://fdlwfmzzlshcjhsoqftd.supabase.co/functions/v1/create-order",
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-order`,
         {
           method: "POST",
           headers: {
