@@ -94,7 +94,7 @@ const Navbar: React.FC = () => {
           >
             <Box
               component="img"
-              src="/lootbox/Pickio_Logo.png"
+              src="/Pickio_Logo.png"
               alt="Pickio"
               sx={{
                 height: 36,

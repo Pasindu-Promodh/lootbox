@@ -124,7 +124,7 @@ const HomePage: React.FC = () => {
         sx={{
           // backgroundImage:
           //   "url(https://placehold.co/1200x400?text=Pickio&bg=555&fg=fff)",
-          backgroundImage: isDesktop ? "url(/lootbox/bg.png)" : "url(/lootbox/bg-mobile.png)",
+          backgroundImage: isDesktop ? "url(/bg.png)" : "url(/bg-mobile.png)",
           backgroundSize: "cover",
           backgroundPosition: "center",
           color: "#fff",
