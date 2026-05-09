@@ -5,6 +5,7 @@ import {
   Button,
   CardMedia,
   CircularProgress,
+  Skeleton,
   Typography,
 } from "@mui/material";
 import ProductGrid from "../components/ProductGrid";
@@ -24,7 +25,7 @@ export default function ProductPage() {
   const [loading, setLoading] = useState(true);
   const [product, setProduct] = useState<Product | null>(null);
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
-  const [mainImage, setMainImage] = useState("");
+  const [mainImage, setMainImage] = useState<string | null>(null);
   const [viewerOpen, setViewerOpen] = useState(false);
   const [zoomed, setZoomed] = useState(false);
 
@@ -43,15 +44,15 @@ export default function ProductPage() {
     const prod = await getProductById(productId);
     setProduct(prod);
 
-    if (prod) setMainImage(prod.images[0]?.main || "");
+    if (prod) setMainImage(prod?.images[0]?.main || null);
 
     // Fetch related products by main category, excluding current product
     if (prod) {
       const related = await getProducts({
-        category: prod.category,
+        category: prod?.category,
         limit: 10,
       });
-      setRelatedProducts(related.filter((p) => p.id !== prod.id).slice(0, 10));
+      setRelatedProducts(related.filter((p) => p.id !== prod?.id).slice(0, 10));
     }
 
     setLoading(false);
@@ -63,15 +64,15 @@ export default function ProductPage() {
   }, [product]);
 
   const index = mainImage
-    ? product?.images.findIndex((img) => img.main === mainImage) ?? 0
+    ? (product?.images.findIndex((img) => img.main === mainImage) ?? 0)
     : 0;
 
   const goNext = useCallback(
     () =>
       setMainImage(
-        product?.images[(index + 1) % (product.images.length || 1)]?.main || ""
+        product?.images[(index + 1) % (product.images.length || 1)]?.main || "",
       ),
-    [index, product]
+    [index, product],
   );
 
   const goPrev = useCallback(
@@ -80,9 +81,9 @@ export default function ProductPage() {
         product?.images[
           (index - 1 + (product.images.length || 1)) %
             (product.images.length || 1)
-        ]?.main || ""
+        ]?.main || "",
       ),
-    [index, product]
+    [index, product],
   );
 
   const toggleZoom = () => setZoomed((z) => !z);
@@ -140,28 +141,37 @@ export default function ProductPage() {
         }}
       >
         {/* IMAGE */}
-        <Box sx={{ flex: 1 }}>
+        <Box sx={{ flex: 0.6 }}>
           <Box
             sx={{
               width: "100%",
+              aspectRatio: "1/1",
               borderRadius: 2,
               overflow: "hidden",
               cursor: "zoom-in",
             }}
             onClick={() => setViewerOpen(true)}
           >
-            <CardMedia
-              component="img"
-              src={mainImage}
-              alt={product.name}
-              sx={{
-                width: "100%",
-                aspectRatio: "1/1",
-                objectFit: "cover",
-                transition: "transform .3s",
-                "&:hover": { transform: "scale(1.03)" },
-              }}
-            />
+            {mainImage ? (
+              <CardMedia
+                component="img"
+                src={mainImage}
+                alt={product?.name}
+                sx={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                  transition: "transform .3s",
+                  "&:hover": { transform: "scale(1.03)" },
+                }}
+              />
+            ) : (
+              <Skeleton
+                variant="rectangular"
+                animation="wave"
+                sx={{ width: "100%", height: "100%" }}
+              />
+            )}
           </Box>
 
           <Box sx={{ display: "flex", gap: 2, mt: 2, overflowX: "auto" }}>
@@ -219,11 +229,13 @@ export default function ProductPage() {
                   Rs {product.pre_discount_price}
                 </Typography>
                 <Typography color="error" fontWeight={600}>
-                  Save {Math.round(
-                  ((product.pre_discount_price - product.price) /
-                    product.pre_discount_price) *
-                    100
-                )}%
+                  Save{" "}
+                  {Math.round(
+                    ((product.pre_discount_price - product.price) /
+                      product.pre_discount_price) *
+                      100,
+                  )}
+                  %
                 </Typography>
               </>
             )}
@@ -249,9 +261,7 @@ export default function ProductPage() {
               backgroundColor: "#f7f7f7",
             }}
           >
-            <Typography variant="body2">
-              ✔ Cash on Delivery
-            </Typography>
+            <Typography variant="body2">✔ Cash on Delivery</Typography>
           </Box>
 
           <Box sx={{ display: "flex", gap: 2, mb: 2 }}>

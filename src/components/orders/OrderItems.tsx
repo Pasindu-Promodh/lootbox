@@ -1,4 +1,4 @@
-import { Box, Tooltip, Typography } from "@mui/material";
+import { Box, Skeleton, Tooltip, Typography } from "@mui/material";
 import type { OrderItem } from "../../types/order";
 
 interface Props {
@@ -8,7 +8,6 @@ interface Props {
 }
 
 const OrderItems: React.FC<Props> = ({ items, productMap, onClickProduct }) => {
- 
   return (
     <>
       {items.map((item, i) => {
@@ -30,19 +29,33 @@ const OrderItems: React.FC<Props> = ({ items, productMap, onClickProduct }) => {
             }}
             onClick={() => product && onClickProduct(product.id)}
           >
-            {product?.images?.[0] && (
-              <Box
-                component="img"
-                src={product.images[0]?.thumb}
-                sx={{
-                  width: 80,
-                  height: 80,
-                  borderRadius: 1,
-                  objectFit: "cover",
-                }}
-              />
-            )}
-
+            <Box
+              sx={{
+                width: 80,
+                height: 80,
+                borderRadius: 1,
+                overflow: "hidden",
+                flexShrink: 0,
+              }}
+            >
+              {product?.images?.[0] ? (
+                <Box
+                  component="img"
+                  src={product?.images[0]?.thumb}
+                  sx={{
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                  }}
+                />
+              ) : (
+                <Skeleton
+                  variant="rectangular"
+                  animation="wave"
+                  sx={{ width: "100%", height: "100%" }}
+                />
+              )}
+            </Box>
             {/* <Box sx={{ flex: 1 }}> */}
             <Box
               sx={{

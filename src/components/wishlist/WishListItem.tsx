@@ -5,6 +5,7 @@ import {
   IconButton,
   CardMedia,
   Tooltip,
+  Skeleton,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useWishList } from "../../context/WishListContext";
@@ -34,17 +35,33 @@ const WishListItem: React.FC<Props> = ({ item, onClose, onClickProduct }) => {
       }}
       onClick={() => {
         onClose();
-        onClickProduct(item.id);
+        onClickProduct(item?.id);
       }}
     >
-      {item.image && (
-        <CardMedia
-          component="img"
-          src={item.image}
-          alt={item.name}
-          sx={{ width: 80, height: 80, borderRadius: 1, objectFit: "cover" }}
-        />
-      )}
+      <Box
+        sx={{
+          width: 80,
+          height: 80,
+          borderRadius: 1,
+          overflow: "hidden",
+          flexShrink: 0,
+        }}
+      >
+        {item?.image ? (
+          <CardMedia
+            component="img"
+            src={item?.image}
+            alt={item?.name}
+            sx={{ width: "100%", height: "100%", objectFit: "cover" }}
+          />
+        ) : (
+          <Skeleton
+            variant="rectangular"
+            animation="wave"
+            sx={{ width: "100%", height: "100%" }}
+          />
+        )}
+      </Box>
 
       {/* <Box sx={{ flex: 1 }}> */}
       <Box
@@ -58,7 +75,7 @@ const WishListItem: React.FC<Props> = ({ item, onClose, onClickProduct }) => {
           overflow: "hidden",
         }}
       >
-        <Tooltip title={item.name}>
+        <Tooltip title={item?.name}>
           <Typography
             variant="body2"
             fontWeight={500}
@@ -72,7 +89,7 @@ const WishListItem: React.FC<Props> = ({ item, onClose, onClickProduct }) => {
               overflow: "hidden",
             }}
           >
-            {item.name}
+            {item?.name}
           </Typography>
         </Tooltip>
         <Box
@@ -87,16 +104,16 @@ const WishListItem: React.FC<Props> = ({ item, onClose, onClickProduct }) => {
             fontWeight={500}
             sx={{ fontSize: "1rem", color: "primary.main" }}
           >
-            Rs {item.price}
+            Rs {item?.price}
           </Typography>
-          {item.pre_discount_price > item.price && (
+          {item?.pre_discount_price > item?.price && (
             <>
               <Typography
                 variant="body2"
                 color="text.secondary"
                 sx={{ textDecoration: "line-through", fontSize: "0.75rem" }}
               >
-                Rs {item.pre_discount_price}
+                Rs {item?.pre_discount_price}
               </Typography>
 
               <Typography
@@ -106,22 +123,22 @@ const WishListItem: React.FC<Props> = ({ item, onClose, onClickProduct }) => {
                 sx={{ fontSize: "0.8rem" }}
               >
                 {Math.round(
-                  ((item.pre_discount_price - item.price) /
-                    item.pre_discount_price) *
+                  ((item?.pre_discount_price - item?.price) /
+                    item?.pre_discount_price) *
                     100,
                 )}
                 % OFF
               </Typography>
             </>
           )}
-          {/* {item.discount != 0 && (
+          {/* {item?.discount != 0 && (
             <Typography
               variant="body2"
               color="error"
               fontWeight={600}
               sx={{ fontSize: "0.8rem" }}
             >
-              {item.discount}% OFF
+              {item?.discount}% OFF
             </Typography>
           )} */}
         </Box>
@@ -130,7 +147,7 @@ const WishListItem: React.FC<Props> = ({ item, onClose, onClickProduct }) => {
       <IconButton
         onClick={(e) => {
           e.stopPropagation();
-          removeFromWishList(item.id);
+          removeFromWishList(item?.id);
         }}
         color="error"
       >

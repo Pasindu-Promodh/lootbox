@@ -5,6 +5,7 @@ import {
   IconButton,
   CardMedia,
   Tooltip,
+  Skeleton,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useCart } from "../../context/CartContext";
@@ -16,11 +17,7 @@ interface Props {
   onClickProduct: (id: string) => void;
 }
 
-const CartItem: React.FC<Props> = ({
-  item,
-  onClose,
-  onClickProduct,
-}) => {
+const CartItem: React.FC<Props> = ({ item, onClose, onClickProduct }) => {
   const { removeFromCart } = useCart();
 
   // const handleIncrease = () => updateQty(item.id, item.quantity + 1);
@@ -42,17 +39,33 @@ const CartItem: React.FC<Props> = ({
       }}
       onClick={() => {
         onClose?.();
-        onClickProduct(item.id);
+        onClickProduct(item?.id);
       }}
     >
-      {item.image && (
-        <CardMedia
-          component="img"
-          src={item.image}
-          alt={item.name}
-          sx={{ width: 80, height: 80, borderRadius: 1, objectFit: "cover" }}
-        />
-      )}
+      <Box
+        sx={{
+          width: 80,
+          height: 80,
+          borderRadius: 1,
+          overflow: "hidden",
+          flexShrink: 0,
+        }}
+      >
+        {item?.image ? (
+          <CardMedia
+            component="img"
+            src={item?.image}
+            alt={item?.name}
+            sx={{ width: "100%", height: "100%", objectFit: "cover" }}
+          />
+        ) : (
+          <Skeleton
+            variant="rectangular"
+            animation="wave"
+            sx={{ width: "100%", height: "100%" }}
+          />
+        )}
+      </Box>
 
       {/* <Box sx={{ flex: 1 }}> */}
       {/* <Box sx={{ flexGrow: 1,py: 0.5, display: "flex", flexDirection: "column", justifyContent: "space-between", height: 80 }}> */}
@@ -67,7 +80,7 @@ const CartItem: React.FC<Props> = ({
           overflow: "hidden",
         }}
       >
-        <Tooltip title={item.name}>
+        <Tooltip title={item?.name}>
           <Typography
             variant="body2"
             fontWeight={500}
@@ -82,7 +95,7 @@ const CartItem: React.FC<Props> = ({
               overflow: "hidden",
             }}
           >
-            {item.name}
+            {item?.name}
           </Typography>
         </Tooltip>
 
@@ -92,17 +105,17 @@ const CartItem: React.FC<Props> = ({
             fontWeight={500}
             sx={{ fontSize: "1rem", color: "primary.main" }}
           >
-            Rs {item.price}
+            Rs {item?.price}
           </Typography>
 
-          {item.pre_discount_price > item.price && (
+          {item?.pre_discount_price > item?.price && (
             <>
               <Typography
                 variant="body2"
                 color="text.secondary"
                 sx={{ textDecoration: "line-through", fontSize: "0.75rem" }}
               >
-                Rs {item.pre_discount_price}
+                Rs {item?.pre_discount_price}
               </Typography>
               <Typography
                 variant="body2"
@@ -111,8 +124,8 @@ const CartItem: React.FC<Props> = ({
                 sx={{ fontSize: "0.8rem" }}
               >
                 {Math.round(
-                  ((item.pre_discount_price - item.price) /
-                    item.pre_discount_price) *
+                  ((item?.pre_discount_price - item?.price) /
+                    item?.pre_discount_price) *
                     100,
                 )}
                 % OFF
@@ -175,7 +188,7 @@ const CartItem: React.FC<Props> = ({
       <IconButton
         onClick={(e) => {
           e.stopPropagation();
-          removeFromCart(item.id);
+          removeFromCart(item?.id);
         }}
         color="error"
       >

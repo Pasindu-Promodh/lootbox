@@ -10,6 +10,7 @@ import {
   ClickAwayListener,
   CircularProgress,
   Tooltip,
+  Skeleton,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import type { Product } from "../types/product";
@@ -110,8 +111,8 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
 
       {results.map((p) => (
         <Card
-          key={p.id}
-          onClick={() => handleSelectProduct(p.id)}
+          key={p?.id}
+          onClick={() => handleSelectProduct(p?.id)}
           sx={{
             display: "flex",
             alignItems: "center",
@@ -121,22 +122,54 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
             "&:hover": { boxShadow: 3 },
           }}
         >
-          <CardMedia
-            component="img"
-            image={p.images?.[0]?.thumb}
-            alt={p.name}
-            sx={{ width: 80, height: 80, objectFit: "cover", borderRadius: 1 }}
-          />
+          <Box
+            sx={{
+              width: 80,
+              height: 80,
+              borderRadius: 1,
+              overflow: "hidden",
+              flexShrink: 0,
+            }}
+          >
+            {p?.images?.[0]?.thumb ? (
+              <CardMedia
+                component="img"
+                image={p?.images?.[0]?.thumb}
+                alt={p?.name}
+                sx={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                }}
+              />
+            ) : (
+              <Skeleton
+                variant="rectangular"
+                animation="wave"
+                sx={{ width: "100%", height: "100%" }}
+              />
+            )}
+          </Box>
 
-          <CardContent sx={{ flexGrow: 1, py: 0.5, px: 1,display: "flex", flexDirection: "column", justifyContent: "space-between", height: 80 }}>
-            <Tooltip title={p.name}>
+          <CardContent
+            sx={{
+              flexGrow: 1,
+              py: 0.5,
+              px: 1,
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "space-between",
+              height: 80,
+            }}
+          >
+            <Tooltip title={p?.name}>
               <Typography
                 variant="body2"
                 fontWeight={500}
                 // noWrap
                 sx={{ fontSize: "0.9rem" }}
               >
-                {p.name}
+                {p?.name}
               </Typography>
             </Tooltip>
 
@@ -148,9 +181,9 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
                 fontWeight={500}
                 sx={{ fontSize: "1.1rem", color: "primary.main" }}
               >
-                Rs {p.price}
+                Rs {p?.price}
               </Typography>
-              {p.pre_discount_price > p.price && (
+              {p?.pre_discount_price > p?.price && (
                 <>
                   <Typography
                     variant="body2"
@@ -160,7 +193,7 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
                       fontSize: "0.75rem",
                     }}
                   >
-                    Rs {p.pre_discount_price}
+                    Rs {p?.pre_discount_price}
                   </Typography>
                   <Typography
                     variant="body2"
@@ -169,15 +202,15 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
                     sx={{ fontSize: "0.8rem" }}
                   >
                     {Math.round(
-                      ((p.pre_discount_price - p.price) /
-                        p.pre_discount_price) *
+                      ((p?.pre_discount_price - p?.price) /
+                        p?.pre_discount_price) *
                         100,
                     )}
                     % OFF
                   </Typography>
                 </>
               )}
-              {/* {p.on_sale && (
+              {/* {p?.on_sale && (
                 <Typography
                   variant="body2"
                   color="error"
@@ -185,7 +218,7 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
                   sx={{ fontSize: "0.8rem" }}
                 >
                   {Math.round(
-                    ((p.pre_discount_price - p.price) / p.pre_discount_price) *
+                    ((p?.pre_discount_price - p?.price) / p?.pre_discount_price) *
                       100
                   )}
                   % OFF
@@ -269,8 +302,8 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
                 )}
                 {results.map((p) => (
                   <Card
-                    key={p.id}
-                    onClick={() => handleSelectProduct(p.id)}
+                    key={p?.id}
+                    onClick={() => handleSelectProduct(p?.id)}
                     sx={{
                       display: "flex",
                       alignItems: "center",
@@ -282,8 +315,8 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
                   >
                     <CardMedia
                       component="img"
-                      image={p.images?.[0]?.thumb}
-                      alt={p.name}
+                      image={p?.images?.[0]?.thumb}
+                      alt={p?.name}
                       sx={{
                         width: 80,
                         height: 80,
@@ -291,17 +324,27 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
                         borderRadius: 1,
                       }}
                     />
-                    <CardContent sx={{ flexGrow: 1, py: 0.5, px: 1,display: "flex", flexDirection: "column", justifyContent: "space-between", height: 80 }}>
+                    <CardContent
+                      sx={{
+                        flexGrow: 1,
+                        py: 0.5,
+                        px: 1,
+                        display: "flex",
+                        flexDirection: "column",
+                        justifyContent: "space-between",
+                        height: 80,
+                      }}
+                    >
                       <Typography
                         variant="body2"
                         fontWeight={500}
                         // noWrap
                         sx={{ fontSize: "0.9rem" }}
                       >
-                        {p.name}
+                        {p?.name}
                       </Typography>
                       {/* <Typography variant="caption" color="text.secondary">
-                          {p.category}
+                          {p?.category}
                         </Typography> */}
                       <Box
                         sx={{
@@ -316,9 +359,9 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
                           fontWeight={500}
                           sx={{ fontSize: "1.1rem", color: "primary.main" }}
                         >
-                          Rs {p.price}
+                          Rs {p?.price}
                         </Typography>
-                        {p.pre_discount_price > p.price && (
+                        {p?.pre_discount_price > p?.price && (
                           <>
                             <Typography
                               variant="body2"
@@ -328,7 +371,7 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
                                 fontSize: "0.75rem",
                               }}
                             >
-                              Rs {p.pre_discount_price}
+                              Rs {p?.pre_discount_price}
                             </Typography>
                             <Typography
                               variant="body2"
@@ -337,22 +380,22 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
                               sx={{ fontSize: "0.8rem" }}
                             >
                               {Math.round(
-                                ((p.pre_discount_price - p.price) /
-                                  p.pre_discount_price) *
+                                ((p?.pre_discount_price - p?.price) /
+                                  p?.pre_discount_price) *
                                   100,
                               )}
                               % OFF
                             </Typography>
                           </>
                         )}
-                        {/* {p.on_sale && (
+                        {/* {p?.on_sale && (
                           <Typography
                             variant="body2"
                             color="error"
                             fontWeight={600}
                             sx={{ fontSize: "0.8rem" }}
                           >
-                            {p.discount}% OFF
+                            {p?.discount}% OFF
                           </Typography>
                         )} */}
                       </Box>

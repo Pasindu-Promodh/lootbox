@@ -114,8 +114,8 @@ const ProductCard: React.FC<Props> = ({
         )}
         <CardMedia
           component="img"
-          src={product.images[0].thumb}
-          alt={product.name}
+          src={product?.images[0]?.thumb}
+          alt={product?.name}
           onLoad={() => setLoaded(true)}
           sx={{
             position: "absolute",
