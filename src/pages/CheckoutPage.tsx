@@ -20,6 +20,8 @@ import type { User } from "@supabase/supabase-js";
 import { useNavigate } from "react-router-dom";
 import { useNotification } from "../context/NotificationContext";
 import CartItem from "../components/cart/CartItem";
+import WhatsAppIcon from "@mui/icons-material/WhatsApp";
+import { getWhatsAppLink } from "../utils/whatsapp";
 
 const districts = [
   "Colombo",
@@ -488,6 +490,19 @@ const CheckoutPage: React.FC = () => {
               onClick={placeOrder}
             >
               {isPlacingOrder ? "Placing Order..." : "Place Order"}
+            </Button>
+
+            <Button
+              fullWidth
+              variant="text"
+              size="small"
+              startIcon={<WhatsAppIcon sx={{ color: "#25D366" }} />}
+              href={getWhatsAppLink("Hi, I need help with my order")}
+              target="_blank"
+              rel="noopener noreferrer"
+              sx={{ mt: 1 }}
+            >
+              Need help? Chat with us on WhatsApp
             </Button>
           </CardContent>
         </Card>

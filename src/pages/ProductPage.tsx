@@ -8,10 +8,12 @@ import {
   Skeleton,
   Typography,
 } from "@mui/material";
+import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 import ProductGrid from "../components/ProductGrid";
 import FullscreenViewer from "../components/FullscreenViewer";
 import { useCart } from "../context/CartContext";
 import { useWishList } from "../context/WishListContext";
+import { getWhatsAppLink } from "../utils/whatsapp";
 
 import { getProductById, getProducts } from "../data/fetchProducts";
 import type { Product } from "../types/product";
@@ -291,6 +293,17 @@ export default function ProductPage() {
               {isInWishList ? "Remove from Wishlist" : "Add to Wishlist"}
             </Button>
           </Box>
+
+          <Button
+            variant="text"
+            startIcon={<WhatsAppIcon sx={{ color: "#25D366" }} />}
+            href={getWhatsAppLink(`Hi, I'm interested in "${product.name}"`)}
+            target="_blank"
+            rel="noopener noreferrer"
+            sx={{ mb: 2 }}
+          >
+            Ask about this product on WhatsApp
+          </Button>
         </Box>
       </Box>
 

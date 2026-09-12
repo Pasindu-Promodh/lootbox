@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   AppBar,
   Toolbar,
@@ -31,6 +31,7 @@ import { useWishList } from "../context/WishListContext";
 
 import { useAuth } from "../AuthContext";
 import ShopCategoryDrawer from "./ShopCategoryDrawer";
+import { useDrawerVisibility } from "../context/DrawerVisibilityContext";
 
 
 const Navbar: React.FC = () => {
@@ -46,6 +47,11 @@ const Navbar: React.FC = () => {
   const [cartOpen, setCartOpen] = useState(false);
   const [wishListOpen, setWishListOpen] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+
+  const { setDrawerOpen } = useDrawerVisibility();
+  useEffect(() => {
+    setDrawerOpen(shopOpen || cartOpen || wishListOpen);
+  }, [shopOpen, cartOpen, wishListOpen, setDrawerOpen]);
 
   const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
 

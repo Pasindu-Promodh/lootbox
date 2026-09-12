@@ -19,10 +19,12 @@ import { Accordion, AccordionSummary, AccordionDetails } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { getLatestOrderStatus } from "../../utils/orderStatus";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 import { useState } from "react";
 import { supabase } from "../../supabase";
 import { useNotification } from "../../context/NotificationContext";
 import ConfirmDialog from "../common/ConfirmDialog";
+import { getWhatsAppLink } from "../../utils/whatsapp";
 
 interface Props {
   order: Order;
@@ -198,17 +200,34 @@ const OrderCard: React.FC<Props> = ({
             <OrderPriceBreakdown order={order} />
           </AccordionDetails>
         </Accordion>
-        {latestStatus !== "delivered" && latestStatus !== "cancelled" && (
+        <Box display="flex" gap={2} flexWrap="wrap">
+          {latestStatus !== "delivered" && latestStatus !== "cancelled" && (
+            <Button
+              variant="contained"
+              color="success"
+              onClick={() => setConfirmOpen(true)}
+              disabled={isMarkingDelivered}
+              sx={{ mt: 2 }}
+            >
+              {isMarkingDelivered ? "Confirming..." : "Mark as Delivered"}
+            </Button>
+          )}
+
           <Button
-            variant="contained"
-            color="success"
-            onClick={() => setConfirmOpen(true)}
-            disabled={isMarkingDelivered}
+            variant="outlined"
+            startIcon={<WhatsAppIcon sx={{ color: "#25D366" }} />}
+            href={getWhatsAppLink(
+              `Hi, I have a question about my order #${order.id
+                .slice(0, 8)
+                .toUpperCase()}`
+            )}
+            target="_blank"
+            rel="noopener noreferrer"
             sx={{ mt: 2 }}
           >
-            {isMarkingDelivered ? "Confirming..." : "Mark as Delivered"}
+            Ask about this order
           </Button>
-        )}
+        </Box>
       </CardContent>
       <ConfirmDialog
         open={confirmOpen}
