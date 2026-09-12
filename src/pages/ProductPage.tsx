@@ -212,7 +212,10 @@ export default function ProductPage() {
             {product.sub_category && `/ ${product.sub_category}`}
           </Typography>
 
-          <Typography variant="body1" sx={{ mb: 2, color: "text.secondary" }}>
+          <Typography
+            variant="body1"
+            sx={{ mb: 2, color: "text.secondary", whiteSpace: "pre-line" }}
+          >
             {product.description}
           </Typography>
 
