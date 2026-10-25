@@ -1,7 +1,8 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useCallback, useContext, useState, useEffect } from "react";
 import { useNotification } from "./NotificationContext";
-import { getProductById } from "../data/fetchProducts";
+import { getProductById, getProductsByIds } from "../data/fetchProducts";
 import type { Cart, CartStorageItem } from "../types/cart";
+import { MAX_CART_ITEMS, MAX_QTY_PER_ITEM, SHIPPING_FEE } from "../utils/checkout";
 
 interface CartContextType {
   cart: Cart[];
@@ -24,6 +25,38 @@ export const useCart = () => {
   return context;
 };
 
+function readSavedCart(): CartStorageItem[] {
+  try {
+    const saved = JSON.parse(localStorage.getItem("cart") ?? "[]");
+    return Array.isArray(saved) ? saved : [];
+  } catch {
+    return [];
+  }
+}
+
+// Saved cart with fresh prices (one request for all items); null if empty.
+async function loadSavedCart(): Promise<Cart[] | null> {
+  const savedItems = readSavedCart();
+  if (!savedItems.length) return null;
+
+  const products = await getProductsByIds(savedItems.map((i) => i.id));
+
+  return savedItems.flatMap((item) => {
+    const product = products[item.id];
+    if (!product) return [];
+    return [
+      {
+        id: product.id,
+        name: product.name,
+        pre_discount_price: product.pre_discount_price,
+        price: product.price,
+        image: product.images[0]?.thumb,
+        quantity: item.quantity,
+      },
+    ];
+  });
+}
+
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
@@ -31,9 +64,21 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
   const [lastAddedCart, setLastAddedCart] = useState<Cart | null>(null);
   const { showNotification } = useNotification();
 
+  // --- Refresh cart with latest product data ---
+  const refreshCart = useCallback(async () => {
+    const saved = await loadSavedCart();
+    if (saved) setCart(saved);
+  }, []);
+
   // --- Load cart from localStorage and fetch fresh product data ---
   useEffect(() => {
-    refreshCart();
+    let cancelled = false;
+    loadSavedCart().then((saved) => {
+      if (!cancelled && saved) setCart(saved);
+    });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   // --- Sync cart quantities (only ID + qty) to localStorage ---
@@ -47,10 +92,30 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
 
   // --- Add item to cart ---
   const addToCart = async (id: string, quantity: number = 1) => {
-    if(cart.length >= 1) {
-      showNotification("Cart limit reached (1 items)!", "error");
+    const existing = cart.find((i) => i.id === id);
+
+    if (existing) {
+      if (existing.quantity + quantity > MAX_QTY_PER_ITEM) {
+        showNotification(`Maximum ${MAX_QTY_PER_ITEM} per item`, "error");
+        return;
+      }
+      setCart((prev) =>
+        prev.map((i) =>
+          i.id === id ? { ...i, quantity: i.quantity + quantity } : i
+        )
+      );
+      showNotification("Quantity updated!", "info");
       return;
     }
+
+    if (cart.length >= MAX_CART_ITEMS) {
+      showNotification(
+        `You can order up to ${MAX_CART_ITEMS} product${MAX_CART_ITEMS > 1 ? "s" : ""} at a time`,
+        "error"
+      );
+      return;
+    }
+
     try {
       const product = await getProductById(id);
       if (!product) {
@@ -58,28 +123,17 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
         return;
       }
 
-      const existing = cart.find((i) => i.id === id);
-
-      if (existing) {
-        setCart((prev) =>
-          prev.map((i) =>
-            i.id === id ? { ...i, quantity: i.quantity + quantity } : i
-          )
-        );
-        showNotification("Quantity updated!", "info");
-      } else {
-        const newItem: Cart = {
-          id: product.id,
-          name: product.name,
-          pre_discount_price: product.pre_discount_price,
-          price: product.price,
-          image: product.images[0]?.thumb,
-          quantity,
-        };
-        setCart((prev) => [...prev, newItem]);
-        setLastAddedCart(newItem);
-        showNotification(`${product.name} added to cart!`, "success");
-      }
+      const newItem: Cart = {
+        id: product.id,
+        name: product.name,
+        pre_discount_price: product.pre_discount_price,
+        price: product.price,
+        image: product.images[0]?.thumb,
+        quantity,
+      };
+      setCart((prev) => [...prev, newItem]);
+      setLastAddedCart(newItem);
+      showNotification(`${product.name} added to cart!`, "success");
     } catch (err) {
       console.error("Error adding product to cart:", err);
       showNotification("Failed to add product to cart", "error");
@@ -99,6 +153,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
       removeFromCart(id);
       return;
     }
+    qty = Math.min(qty, MAX_QTY_PER_ITEM);
 
     setCart((prev) =>
       prev.map((i) => (i.id === id ? { ...i, quantity: qty } : i))
@@ -110,43 +165,11 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
   const clearCart = () => {
     setCart([]);
     setLastAddedCart(null);
-    // showNotification("Cart cleared!", "info");
-  };
-
-  // --- Refresh cart with latest product data ---
-  const refreshCart = async () => {
-    const saved = localStorage.getItem("cart");
-    if (!saved) return;
-
-    const savedItems: CartStorageItem[] = JSON.parse(saved);
-
-    const refreshed = (
-      await Promise.all(
-        savedItems.map(async (item) => {
-          const product = await getProductById(item.id);
-          if (!product) return null;
-
-          return {
-            id: product.id,
-            name: product.name,
-            pre_discount_price: product.pre_discount_price,
-            price: product.price,
-            image: product.images[0]?.thumb,
-            quantity: item.quantity,
-          };
-        })
-      )
-    ).filter(Boolean) as Cart[];
-
-    setCart(refreshed);
   };
 
   // --- Compute totals ---
-  const total = cart.reduce(
-    (sum, i) => sum + i.price * i.quantity,
-    0
-  );
-  const shipping = cart.length > 0 ? 350 : 0;
+  const total = cart.reduce((sum, i) => sum + i.price * i.quantity, 0);
+  const shipping = cart.length > 0 ? SHIPPING_FEE : 0;
   const totalCart = cart.reduce((sum, i) => sum + i.quantity, 0);
 
   return (

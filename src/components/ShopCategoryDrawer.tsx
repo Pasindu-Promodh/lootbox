@@ -8,10 +8,23 @@ import {
   useTheme,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import { useNavigate } from "react-router-dom";
+import { Link as RouterLink } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { getCategories } from "../data/fetchCategories";
 import type { Category } from "../types/category";
+
+const shopUrl = (category: string, sub?: string) => {
+  const params = new URLSearchParams({ category });
+  if (sub) params.set("sub_category", sub);
+  return `/shop?${params}`;
+};
+
+const linkSx = {
+  color: "inherit",
+  textDecoration: "none",
+  cursor: "pointer",
+  "&:hover, &:focus-visible": { color: "primary.main" },
+};
 
 type Props = {
   open: boolean;
@@ -19,43 +32,23 @@ type Props = {
 };
 
 const ShopCategoryDrawer = ({ open, onClose }: Props) => {
-  const navigate = useNavigate();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   const [categories, setCategories] = useState<Category[]>([]);
 
+  // Fetch once, the first time the drawer opens.
+  const needsCategories = open && categories.length === 0;
   useEffect(() => {
-    if (!open) return;
-
-    const loadCategories = async () => {
-      const data = await getCategories();
-      setCategories(data);
+    if (!needsCategories) return;
+    let cancelled = false;
+    getCategories().then((data) => {
+      if (!cancelled) setCategories(data);
+    });
+    return () => {
+      cancelled = true;
     };
-
-    if (categories.length === 0) {
-      loadCategories();
-    }
-  }, [open]);
-
-  const goShopAll = () => {
-    navigate("/shop");
-    onClose();
-  };
-
-  const goMain = (main: string) => {
-    navigate(`/shop?category=${encodeURIComponent(main)}`);
-    onClose();
-  };
-
-  const goSub = (main: string, sub: string) => {
-    navigate(
-      `/shop?category=${encodeURIComponent(
-        main
-      )}&sub_category=${encodeURIComponent(sub)}`
-    );
-    onClose();
-  };
+  }, [needsCategories]);
 
   return (
     <Drawer
@@ -79,7 +72,7 @@ const ShopCategoryDrawer = ({ open, onClose }: Props) => {
           }}
         >
           <Typography variant="h6">Shop Categories</Typography>
-          <IconButton onClick={onClose}>
+          <IconButton onClick={onClose} aria-label="Close categories">
             <CloseIcon />
           </IconButton>
         </Box>
@@ -88,14 +81,10 @@ const ShopCategoryDrawer = ({ open, onClose }: Props) => {
 
         {/* Shop All */}
         <Box
-          sx={{
-            px: 3,
-            py: 2,
-            cursor: "pointer",
-            fontWeight: 700,
-            "&:hover": { color: "primary.main" },
-          }}
-          onClick={goShopAll}
+          component={RouterLink}
+          to="/shop"
+          onClick={onClose}
+          sx={{ ...linkSx, display: "block", px: 3, py: 2, fontWeight: 700 }}
         >
           Shop All
         </Box>
@@ -114,32 +103,28 @@ const ShopCategoryDrawer = ({ open, onClose }: Props) => {
             gap: 4,
           }}
         >
-          {categories.map((cat, i) => (
-            <Box key={i}>
+          {categories.map((cat) => (
+            <Box key={cat.name}>
               {/* Main category */}
               <Typography
+                component={RouterLink}
+                to={shopUrl(cat.name)}
+                onClick={onClose}
                 fontWeight={700}
-                sx={{
-                  mb: 1,
-                  cursor: "pointer",
-                  "&:hover": { color: "primary.main" },
-                }}
-                onClick={() => goMain(cat.name)}
+                sx={{ ...linkSx, display: "block", mb: 1 }}
               >
                 {cat.name}
               </Typography>
 
               {/* Sub categories */}
               <Box sx={{ display: "flex", flexDirection: "column", gap: 0.8 }}>
-                {cat.subs?.map((sub, i) => (
+                {cat.subs?.map((sub) => (
                   <Typography
-                    key={i}
-                    sx={{
-                      cursor: "pointer",
-                      fontSize: "0.9rem",
-                      "&:hover": { color: "primary.main" },
-                    }}
-                    onClick={() => goSub(cat.name, sub)}
+                    key={sub}
+                    component={RouterLink}
+                    to={shopUrl(cat.name, sub)}
+                    onClick={onClose}
+                    sx={{ ...linkSx, fontSize: "0.9rem" }}
                   >
                     {sub}
                   </Typography>

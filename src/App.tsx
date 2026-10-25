@@ -1,17 +1,20 @@
-import { HashRouter, Routes, Route } from 'react-router-dom';
-import { ThemeProvider, createTheme, CssBaseline, Box } from '@mui/material';
+import { lazy, Suspense } from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { ThemeProvider, createTheme, CssBaseline, Box, CircularProgress } from '@mui/material';
 
 // Components
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import WhatsAppButton from './components/WhatsAppButton';
 
-// Pages
+// Pages: home is in the main bundle; the rest load on first visit.
 import Home from "./pages/HomePage";
-import Shop from "./pages/ShopPage";
-import Profile from "./pages/ProfilePage";
-import ProductPage from "./pages/ProductPage";
-import MyOrders from './pages/MyOrders';
+const Shop = lazy(() => import("./pages/ShopPage"));
+const Profile = lazy(() => import("./pages/ProfilePage"));
+const ProductPage = lazy(() => import("./pages/ProductPage"));
+const MyOrders = lazy(() => import("./pages/MyOrders"));
+const CheckoutPage = lazy(() => import("./pages/CheckoutPage"));
+const NotFoundPage = lazy(() => import("./pages/NotFoundPage"));
 
 // Context Providers
 import { NotificationProvider } from './context/NotificationContext';
@@ -19,7 +22,6 @@ import { CartProvider } from './context/CartContext';
 import { WishListProvider } from './context/WishListContext';
 import { AuthProvider } from './AuthContext';
 import { DrawerVisibilityProvider } from './context/DrawerVisibilityContext';
-import CheckoutPage from './pages/CheckoutPage';
 
 
 const theme = createTheme({
@@ -44,10 +46,17 @@ function App() {
         <CartProvider>
           <WishListProvider>
             <DrawerVisibilityProvider>
-              <HashRouter>
+              <BrowserRouter>
                 <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
                   <Navbar />
                   <Box sx={{ flex: 1 }}>
+                    <Suspense
+                      fallback={
+                        <Box sx={{ mt: 10, display: "flex", justifyContent: "center" }}>
+                          <CircularProgress />
+                        </Box>
+                      }
+                    >
                     <Routes>
                       <Route path="/" element={<Home />} />
                       <Route path="/shop" element={<Shop />} />
@@ -55,12 +64,14 @@ function App() {
                       <Route path="/product/:productId" element={<ProductPage />} />
                       <Route path="/orders" element={<MyOrders />} />
                       <Route path="/checkout" element={<CheckoutPage/>} />
+                      <Route path="*" element={<NotFoundPage />} />
                     </Routes>
+                    </Suspense>
                   </Box>
                   <Footer />
                 </Box>
                 <WhatsAppButton />
-              </HashRouter>
+              </BrowserRouter>
             </DrawerVisibilityProvider>
           </WishListProvider>
         </CartProvider>

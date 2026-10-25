@@ -23,7 +23,6 @@ export async function getProducts({
   let query = supabase
     .from("products_public")
     .select("id, name, images, pre_discount_price, price, in_stock, on_sale")
-    // .select("*")
     .range(offset, offset + limit - 1);
 
   if (featured !== undefined) query = query.eq("featured", featured);
@@ -36,6 +35,8 @@ export async function getProducts({
     query = query.order(orderBy.column, {
       ascending: orderBy.ascending ?? false,
     });
+  // Tie-breaker so paged results (range) never repeat or skip rows.
+  query = query.order("id", { ascending: true });
 
   const { data, error } = await query;
   if (error) {
@@ -50,6 +51,8 @@ export async function getProducts({
 export async function getProductById(
   id: string | undefined
 ): Promise<Product | null> {
+  if (!id) return null;
+
   const { data, error } = await supabase
     .from("products_public")
     .select("*")
@@ -57,11 +60,11 @@ export async function getProductById(
     .single();
 
   if (error) {
-    console.error("Error loading order products", error);
+    console.error("Error loading product", error);
     return null;
   }
 
-  return data ?? [];
+  return data;
 }
 
 export async function getProductsByIds(
@@ -106,13 +109,17 @@ export async function searchProducts(
   keyword: string,
   limit = 12
 ): Promise<Product[]> {
-  if (!keyword.trim()) return [];
+  // The keyword is embedded in a PostgREST filter string, where , ( ) and
+  // . are syntax and % _ * are wildcards — strip them so input can't add
+  // filter conditions or break the query.
+  const term = keyword.replace(/[,().%_*\\:"']/g, " ").trim();
+  if (!term) return [];
 
   const { data, error } = await supabase
     .from("products_public")
     .select("id, name, images, pre_discount_price, price")
     .or(
-      `name.ilike.%${keyword}%,description.ilike.%${keyword}%,category.ilike.%${keyword}%,sub_category.ilike.%${keyword}%`
+      `name.ilike.%${term}%,description.ilike.%${term}%,category.ilike.%${term}%,sub_category.ilike.%${term}%`
     )
     .order("added_date", { ascending: false })
     .limit(limit);

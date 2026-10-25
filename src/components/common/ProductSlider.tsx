@@ -54,6 +54,7 @@ const ProductSlider: React.FC<Props> = ({
           <Box display="flex" gap={1}>
             <IconButton
               onClick={() => scroll("left")}
+              aria-label={`Scroll ${title} left`}
               sx={{
                 bgcolor: "background.paper",
                 border: "1px solid",
@@ -70,6 +71,7 @@ const ProductSlider: React.FC<Props> = ({
 
             <IconButton
               onClick={() => scroll("right")}
+              aria-label={`Scroll ${title} right`}
               sx={{
                 bgcolor: "background.paper",
                 border: "1px solid",

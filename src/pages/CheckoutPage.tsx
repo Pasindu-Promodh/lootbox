@@ -22,37 +22,19 @@ import { useNotification } from "../context/NotificationContext";
 import CartItem from "../components/cart/CartItem";
 import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 import { getWhatsAppLink } from "../utils/whatsapp";
+import { usePageTitle } from "../utils/usePageTitle";
+import { clickable } from "../utils/a11y";
+import {
+  DISTRICTS,
+  arePhonesDifferent,
+  formatPrice,
+  validatePhone,
+} from "../utils/checkout";
 
-const districts = [
-  "Colombo",
-  "Gampaha",
-  "Kalutara",
-  "Kandy",
-  "Matale",
-  "Nuwara Eliya",
-  "Galle",
-  "Matara",
-  "Hambantota",
-  "Jaffna",
-  "Kilinochchi",
-  "Mannar",
-  "Vavuniya",
-  "Mullaitivu",
-  "Batticaloa",
-  "Ampara",
-  "Trincomalee",
-  "Kurunegala",
-  "Puttalam",
-  "Anuradhapura",
-  "Polonnaruwa",
-  "Badulla",
-  "Monaragala",
-  "Ratnapura",
-  "Kegalle",
-];
 
 const CheckoutPage: React.FC = () => {
   const navigate = useNavigate();
+  usePageTitle("Checkout");
   const { cart, total, shipping, clearCart, refreshCart } = useCart();
   const { showNotification } = useNotification();
 
@@ -78,8 +60,6 @@ const CheckoutPage: React.FC = () => {
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
   // PAYMENT
   const [paymentMethod, setPaymentMethod] = useState("cod");
-  // const PARTIAL_DISCOUNT = 0.02;
-  // const FULL_DISCOUNT = 0.05;
 
   // ---- PRICE CALCULATIONS ---- //
   const originalTotal = React.useMemo(
@@ -100,87 +80,68 @@ const CheckoutPage: React.FC = () => {
     [subtotal, shipping]
   );
 
-  // const fullDiscountAmount = subtotal * FULL_DISCOUNT;
-  // const fullPayAmount = subtotal - fullDiscountAmount + shipping;
-
-  // const partialDiscountAmount = subtotal * PARTIAL_DISCOUNT;
-  // const partialPayAmount = subtotal - partialDiscountAmount;
-
-  // LOAD PROFILE
+  // LOAD PROFILE, then refresh cart prices
   useEffect(() => {
-    const init = async () => {
-      await loadProfile();
-      refreshCart();
+    const loadProfile = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session) {
+        // Guest mode
+        setUser(null);
+        setEditable(true);
+        return;
+      }
+
+      setUser(session.user);
+
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("user_id", session.user.id)
+        .single();
+
+      if (profile) {
+        setForm({
+          fullName: profile.full_name || "",
+          address: profile.address || "",
+          district: profile.district || "",
+          phone1: profile.phone1 || "",
+          phone2: profile.phone2 || "",
+        });
+
+        setFormOriginal({
+          fullName: profile.full_name || "",
+          address: profile.address || "",
+          district: profile.district || "",
+          phone1: profile.phone1 || "",
+          phone2: profile.phone2 || "",
+        });
+
+        // Null and "" both count as missing, so an incomplete profile opens
+        // in edit mode instead of a locked, empty form.
+        const isIncomplete =
+          !profile.full_name ||
+          !profile.address ||
+          !profile.district ||
+          !profile.phone1 ||
+          !profile.phone2;
+
+        setEditable(isIncomplete); // complete logged-in info is locked by default
+      }
     };
-    init();
-  }, []);
 
-  const loadProfile = async () => {
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-
-    if (!session) {
-      // Guest mode
-      setUser(null);
-      setEditable(true);
-      return;
-    }
-
-    setUser(session.user);
-
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("user_id", session.user.id)
-      .single();
-
-    if (profile) {
-      setForm({
-        fullName: profile.full_name || "",
-        address: profile.address || "",
-        district: profile.district || "",
-        phone1: profile.phone1 || "",
-        phone2: profile.phone2 || "",
-      });
-
-      setFormOriginal({
-        fullName: profile.full_name || "",
-        address: profile.address || "",
-        district: profile.district || "",
-        phone1: profile.phone1 || "",
-        phone2: profile.phone2 || "",
-      });
-
-      const isEmpty =
-        profile.full_name === "" ||
-        profile.address === "" ||
-        profile.district === "" ||
-        profile.phone1 === "" ||
-        profile.phone2 === "";
-
-      setEditable(isEmpty); // logged-in info locked by default
-    }
-  };
+    loadProfile().then(() => refreshCart());
+  }, [refreshCart]);
 
   // Generic form handler
-  const handleChange = React.useCallback((field: string, value: any) => {
+  const handleChange = React.useCallback((field: keyof typeof form, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
   }, []);
 
   const handleClickProduct = (productId: string) => {
     navigate(`/product/${productId}`);
-  };
-
-  const validatePhone = (value: string) => {
-    if (value === "") return true; // allow empty for phone2
-    const pattern = /^07\d{8}$/; // strictly 07XXXXXXXX
-    return pattern.test(value);
-  };
-
-  const arePhonesDifferent = (p1: string, p2: string) => {
-    if (p1 === "" || p2 === "") return true; // only enforce when both filled
-    return p1 !== p2;
   };
 
   // VALIDATION – all required fields must be filled
@@ -204,16 +165,23 @@ const CheckoutPage: React.FC = () => {
     setIsPlacingOrder(true);
 
     try {
+      // Signed-in users send their own access token so the server can tie
+      // the order to them; guests send the anon key.
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
       const res = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-order`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+            Authorization: `Bearer ${
+              session?.access_token ?? import.meta.env.VITE_SUPABASE_ANON_KEY
+            }`,
           },
           body: JSON.stringify({
-            user_id: user?.id ?? null,
             items: cart.map((i) => ({
               product_id: i.id,
               qty: i.quantity,
@@ -231,12 +199,16 @@ const CheckoutPage: React.FC = () => {
       );
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Unknown error");
-      // alert("Order successful!");
-      showNotification(`Order successful!`, "success");
+
+      const orderRef = String(data.order_id).slice(0, 8).toUpperCase();
+      showNotification(
+        `Order placed! Your order ID is #${orderRef}. We'll contact you to confirm.`,
+        "success",
+        6000
+      );
       clearCart();
-      navigate("/");
+      navigate(user ? "/orders" : "/");
     } catch (err) {
-      //alert(`Order failed: ${(err as Error).message}`);
       showNotification(`Order failed: ${(err as Error).message}`, "error");
     } finally {
       setIsPlacingOrder(false);
@@ -269,7 +241,7 @@ const CheckoutPage: React.FC = () => {
                   <Checkbox
                     checked={editable}
                     onChange={() => {
-                      editable ? setForm(formOriginal) : null;
+                      if (editable) setForm(formOriginal);
                       setEditable(!editable);
                     }}
                   />
@@ -327,7 +299,7 @@ const CheckoutPage: React.FC = () => {
                 onChange={(e) => handleChange("district", e.target.value)}
                 error={form.district === ""}
               >
-                {districts.map((d) => (
+                {DISTRICTS.map((d) => (
                   <MenuItem key={d} value={d}>
                     {d}
                   </MenuItem>
@@ -400,7 +372,7 @@ const CheckoutPage: React.FC = () => {
             <Box>
               <Box sx={{ display: "flex", justifyContent: "space-between" }}>
                 <Typography>Subtotal</Typography>
-                <Typography>Rs {originalTotal.toLocaleString()}</Typography>
+                <Typography>{formatPrice(originalTotal)}</Typography>
               </Box>
               {discountTotal > 0 && (
                 <>
@@ -409,7 +381,7 @@ const CheckoutPage: React.FC = () => {
                   >
                     <Typography>Discount</Typography>
                     <Typography color="error.main">
-                      - Rs {discountTotal.toLocaleString()}
+                      - {formatPrice(discountTotal)}
                     </Typography>
                   </Box>
 
@@ -417,14 +389,14 @@ const CheckoutPage: React.FC = () => {
                     sx={{ display: "flex", justifyContent: "space-between" }}
                   >
                     <Typography>Discounted Subtotal</Typography>
-                    <Typography>Rs {subtotal.toLocaleString()}</Typography>
+                    <Typography>{formatPrice(subtotal)}</Typography>
                   </Box>
                 </>
               )}
 
               <Box sx={{ display: "flex", justifyContent: "space-between" }}>
                 <Typography>Shipping</Typography>
-                <Typography>Rs {shipping.toLocaleString()}</Typography>
+                <Typography>{formatPrice(shipping)}</Typography>
               </Box>
 
               <Divider sx={{ my: 2 }} />
@@ -432,37 +404,33 @@ const CheckoutPage: React.FC = () => {
               <Box sx={{ display: "flex", justifyContent: "space-between" }}>
                 <Typography fontWeight={700}>Total</Typography>
                 <Typography fontWeight={700} color="primary">
-                  Rs {finalTotal.toLocaleString()}
+                  {formatPrice(finalTotal)}
                 </Typography>
               </Box>
             </Box>
 
             {/* PAYMENT METHODS */}
-            <Typography mt={2} mb={1} fontWeight={600}>
+            <Typography id="payment-method-label" mt={2} mb={1} fontWeight={600}>
               Choose Payment Method
             </Typography>
 
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+            <Box
+              role="radiogroup"
+              aria-labelledby="payment-method-label"
+              sx={{ display: "flex", flexDirection: "column", gap: 1 }}
+            >
               {[
-                // {
-                //   key: "full",
-                //   title: "Pay Full Amount Online  (5% Discount)",
-                //   description: `Pay Rs ${fullPayAmount.toLocaleString()} now.`,
-                // },
-                // {
-                //   key: "partial",
-                //   title: "Pay Only Shipping (2% Discount)",
-                //   description: `Pay Rs ${shipping.toLocaleString()} now. Remaining: Rs ${partialPayAmount.toLocaleString()}.`,
-                // },
                 {
                   key: "cod",
                   title: "Cash on Delivery",
-                  description: `Pay Rs ${finalTotal.toLocaleString()} when items arrive.`,
+                  description: `Pay ${formatPrice(finalTotal)} when items arrive.`,
                 },
               ].map((pm) => (
                 <Card
                   key={pm.key}
-                  onClick={() => setPaymentMethod(pm.key)}
+                  {...clickable(() => setPaymentMethod(pm.key))}
+                  role="radio"
+                  aria-checked={paymentMethod === pm.key}
                   sx={{
                     p: 2,
                     border:

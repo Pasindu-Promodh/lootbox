@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useNotification } from "./NotificationContext";
-import { getProductById } from "../data/fetchProducts";
+import { getProductById, getProductsByIds } from "../data/fetchProducts";
 import type { WishList, WishListStorageItem } from "../types/wishlist";
 
 interface WishListContextType {
@@ -27,26 +27,33 @@ export const WishListProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   // --- Load wishlist from localStorage and fetch fresh product data ---
   useEffect(() => {
     const loadWishList = async () => {
-      const saved = localStorage.getItem("wishlist");
-      if (!saved) return;
-
-      const savedItems: WishListStorageItem[] = JSON.parse(saved);
-      const products: WishList[] = [];
-
-      for (const item of savedItems) {
-        const product = await getProductById(item.id);
-        if (product) {
-          products.push({
-            id: product.id,
-            name: product.name,
-            pre_discount_price: product.pre_discount_price,
-            price: product.price,
-            image: product.images[0]?.thumb,
-          });
-        }
+      let savedItems: WishListStorageItem[] = [];
+      try {
+        const parsed = JSON.parse(localStorage.getItem("wishlist") ?? "[]");
+        if (Array.isArray(parsed)) savedItems = parsed;
+      } catch {
+        // Corrupt storage: start with an empty wishlist.
       }
+      if (!savedItems.length) return;
 
-      setWishList(products);
+      // One request for all saved items instead of one per item.
+      const products = await getProductsByIds(savedItems.map((i) => i.id));
+
+      setWishList(
+        savedItems.flatMap((item): WishList[] => {
+          const product = products[item.id];
+          if (!product) return [];
+          return [
+            {
+              id: product.id,
+              name: product.name,
+              pre_discount_price: product.pre_discount_price,
+              price: product.price,
+              image: product.images[0]?.thumb,
+            },
+          ];
+        })
+      );
     };
 
     loadWishList();

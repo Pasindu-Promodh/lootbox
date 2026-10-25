@@ -1,15 +1,16 @@
 import { Box, Typography, Divider, Paper } from "@mui/material";
 import type { Order } from "../../types/order";
 
+const LabelValue = ({ label, value }: { label: string; value: string }) => (
+  <Box mb={1}>
+    <Typography variant="caption" color="text.secondary">
+      {label}
+    </Typography>
+    <Typography fontWeight={500}>{value}</Typography>
+  </Box>
+);
+
 const OrderDetails = ({ order }: { order: Order }) => {
-  const LabelValue = ({ label, value }: { label: string; value: string }) => (
-    <Box mb={1}>
-      <Typography variant="caption" color="text.secondary">
-        {label}
-      </Typography>
-      <Typography fontWeight={500}>{value}</Typography>
-    </Box>
-  );
 
   return (
     <Paper

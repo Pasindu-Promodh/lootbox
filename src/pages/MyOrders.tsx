@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   Box,
   Container,
@@ -15,27 +15,26 @@ import { useNavigate } from "react-router-dom";
 import { useNotification } from "../context/NotificationContext";
 import OrderCard from "../components/orders/OrderCard";
 import type { Order, OrderStatus } from "../types/order";
+import type { Product } from "../types/product";
 import { getUserOrders } from "../data/fetchOrders";
+import { usePageTitle } from "../utils/usePageTitle";
 import { getProductsByIds } from "../data/fetchProducts";
 
 const MyOrders: React.FC = () => {
   const navigate = useNavigate();
+  usePageTitle("My Orders");
   const { showNotification } = useNotification();
 
   const [userId, setUserId] = useState<string | null>(null);
 
   const [orders, setOrders] = useState<Order[]>([]);
-  const [productMap, setProductMap] = useState<Record<string, any>>({});
+  const [productMap, setProductMap] = useState<Record<string, Product>>({});
   const [expandedOrderId, setExpandedOrderId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [dateSort, setDateSort] = useState<"newest" | "oldest">("newest");
   const [statusFilter, setStatusFilter] = useState<OrderStatus | "all">("all");
 
-  useEffect(() => {
-    loadOrders();
-  }, []);
-
-  const loadOrders = async () => {
+  const loadOrders = useCallback(async () => {
     try {
       const {
         data: { session },
@@ -66,7 +65,11 @@ const MyOrders: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [navigate, showNotification]);
+
+  useEffect(() => {
+    loadOrders();
+  }, [loadOrders]);
 
   const visibleOrders = orders
     .filter((order) => {

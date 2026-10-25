@@ -10,6 +10,8 @@ import {
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useWishList } from "../../context/WishListContext";
 import type { WishList } from "../../types/wishlist";
+import { formatPrice, discountPercent } from "../../utils/checkout";
+import { clickable } from "../../utils/a11y";
 
 interface Props {
   item: WishList;
@@ -33,10 +35,10 @@ const WishListItem: React.FC<Props> = ({ item, onClose, onClickProduct }) => {
         transition: "transform 0.2s",
         "&:hover": { transform: "scale(1.01)" },
       }}
-      onClick={() => {
+      {...clickable(() => {
         onClose();
         onClickProduct(item?.id);
-      }}
+      }, `View ${item?.name}`)}
     >
       <Box
         sx={{
@@ -104,7 +106,7 @@ const WishListItem: React.FC<Props> = ({ item, onClose, onClickProduct }) => {
             fontWeight={500}
             sx={{ fontSize: "1rem", color: "primary.main" }}
           >
-            Rs {item?.price}
+            {formatPrice(item?.price)}
           </Typography>
           {item?.pre_discount_price > item?.price && (
             <>
@@ -113,7 +115,7 @@ const WishListItem: React.FC<Props> = ({ item, onClose, onClickProduct }) => {
                 color="text.secondary"
                 sx={{ textDecoration: "line-through", fontSize: "0.75rem" }}
               >
-                Rs {item?.pre_discount_price}
+                {formatPrice(item?.pre_discount_price)}
               </Typography>
 
               <Typography
@@ -122,11 +124,7 @@ const WishListItem: React.FC<Props> = ({ item, onClose, onClickProduct }) => {
                 fontWeight={600}
                 sx={{ fontSize: "0.8rem" }}
               >
-                {Math.round(
-                  ((item?.pre_discount_price - item?.price) /
-                    item?.pre_discount_price) *
-                    100,
-                )}
+                {discountPercent(item.pre_discount_price, item.price)}
                 % OFF
               </Typography>
             </>
@@ -150,6 +148,7 @@ const WishListItem: React.FC<Props> = ({ item, onClose, onClickProduct }) => {
           removeFromWishList(item?.id);
         }}
         color="error"
+        aria-label={`Remove ${item?.name} from wishlist`}
       >
         <DeleteIcon />
       </IconButton>

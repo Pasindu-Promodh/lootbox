@@ -18,38 +18,13 @@ import { supabase } from "../supabase";
 import { useNavigate } from "react-router-dom";
 import { useNotification } from "../context/NotificationContext";
 import type { User } from "@supabase/supabase-js";
+import { DISTRICTS, arePhonesDifferent, validatePhone } from "../utils/checkout";
+import { usePageTitle } from "../utils/usePageTitle";
 
 const Profile: FC = () => {
   const navigate = useNavigate();
+  usePageTitle("Profile");
   const { showNotification } = useNotification();
-
-  const districts = [
-    "Colombo",
-    "Gampaha",
-    "Kalutara",
-    "Kandy",
-    "Matale",
-    "Nuwara Eliya",
-    "Galle",
-    "Matara",
-    "Hambantota",
-    "Jaffna",
-    "Kilinochchi",
-    "Mannar",
-    "Vavuniya",
-    "Mullaitivu",
-    "Batticaloa",
-    "Ampara",
-    "Trincomalee",
-    "Kurunegala",
-    "Puttalam",
-    "Anuradhapura",
-    "Polonnaruwa",
-    "Badulla",
-    "Monaragala",
-    "Ratnapura",
-    "Kegalle",
-  ];
 
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -67,18 +42,6 @@ const Profile: FC = () => {
   const [originalPhone1, setOriginalPhone1] = useState("");
   const [originalPhone2, setOriginalPhone2] = useState("");
 
-  // --- Phone validation helper ---
-  const validatePhone = (value: string) => {
-    if (value === "") return true; // allow empty for phone2
-    const pattern = /^07\d{8}$/; // strictly 07XXXXXXXX
-    return pattern.test(value);
-  };
-
-  const arePhonesDifferent = (p1: string, p2: string) => {
-    if (p1 === "" || p2 === "") return true; // only enforce when both exist
-    return p1 !== p2;
-  };
-
   // Check if there are changes
   const hasChanges =
     address !== originalAddress ||
@@ -95,44 +58,44 @@ const Profile: FC = () => {
   const isSaveDisabled = saving || !hasChanges || !isValid;
 
   useEffect(() => {
+    const loadProfile = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session) {
+        navigate("/");
+        return;
+      }
+
+      setUser(session.user);
+
+      // Load profile data
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("user_id", session.user.id)
+        .single();
+
+      if (profile) {
+        setProfileUpdatedAt(profile.updated_at || null);
+        setAddress(profile.address || "");
+        setDistrict(profile.district || "");
+        setPhone1(profile.phone1 || "");
+        setPhone2(profile.phone2 || "");
+
+        // Store original values
+        setOriginalAddress(profile.address || "");
+        setOriginalDistrict(profile.district || "");
+        setOriginalPhone1(profile.phone1 || "");
+        setOriginalPhone2(profile.phone2 || "");
+      }
+
+      setLoading(false);
+    };
+
     loadProfile();
-  }, []);
-
-  const loadProfile = async () => {
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-
-    if (!session) {
-      navigate("/");
-      return;
-    }
-
-    setUser(session.user);
-
-    // Load profile data
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("user_id", session.user.id)
-      .single();
-
-    if (profile) {
-      setProfileUpdatedAt(profile.updated_at || null);
-      setAddress(profile.address || "");
-      setDistrict(profile.district || "");
-      setPhone1(profile.phone1 || "");
-      setPhone2(profile.phone2 || "");
-
-      // Store original values
-      setOriginalAddress(profile.address || "");
-      setOriginalDistrict(profile.district || "");
-      setOriginalPhone1(profile.phone1 || "");
-      setOriginalPhone2(profile.phone2 || "");
-    }
-
-    setLoading(false);
-  };
+  }, [navigate]);
 
   const handleSave = async () => {
     if (isSaveDisabled) return;
@@ -140,17 +103,29 @@ const Profile: FC = () => {
     setSaving(true);
 
     try {
-      const { error } = await supabase
+      if (!user) return;
+      const fields = {
+        full_name: user.user_metadata?.full_name || "",
+        address,
+        district,
+        phone1,
+        phone2,
+      };
+
+      // update() silently matches 0 rows when the profile row doesn't exist
+      // yet, so fall back to inserting it.
+      const { data: updated, error: updateError } = await supabase
         .from("profiles")
-        .update({
-          // user_id: user?.id,
-          full_name: user?.user_metadata?.full_name || "",
-          address,
-          district,
-          phone1,
-          phone2,
-        })
-        .eq("user_id", user?.id);
+        .update(fields)
+        .eq("user_id", user.id)
+        .select("user_id");
+
+      let error = updateError;
+      if (!error && (!updated || updated.length === 0)) {
+        ({ error } = await supabase
+          .from("profiles")
+          .insert({ user_id: user.id, ...fields }));
+      }
 
       if (error) {
         console.error(error.message);
@@ -164,7 +139,7 @@ const Profile: FC = () => {
         setOriginalPhone1(phone1);
         setOriginalPhone2(phone2);
       }
-    } catch (err) {
+    } catch {
       showNotification("An unexpected error occurred", "error");
     } finally {
       setSaving(false);
@@ -224,10 +199,14 @@ const Profile: FC = () => {
               {email}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Member Since: {new Date(created_at || "").toLocaleDateString()}
+              Member Since:{" "}
+              {created_at ? new Date(created_at).toLocaleDateString() : "N/A"}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Last Sign-In: {new Date(last_sign_in_at || "").toLocaleString()}
+              Last Sign-In:{" "}
+              {last_sign_in_at
+                ? new Date(last_sign_in_at).toLocaleString()
+                : "N/A"}
             </Typography>
             <Typography variant="body2" color="text.secondary">
               Last Updated:{" "}
@@ -237,20 +216,6 @@ const Profile: FC = () => {
             </Typography>
           </Box>
         </Box>
-
-        {/* Right side: Last Sign-In & Last Updated */}
-        {/* <Box sx={{ textAlign: "right" }}>
-            <Typography variant="body2" color="text.secondary">
-              Last Sign-In: {new Date(last_sign_in_at || "").toLocaleString()}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Last Updated:{" "}
-              {profileUpdatedAt
-                ? new Date(profileUpdatedAt).toLocaleString()
-                : "N/A"}
-            </Typography>
-          </Box> */}
-        {/* </Box> */}
 
         <Divider sx={{ my: 3 }} />
 
@@ -269,14 +234,14 @@ const Profile: FC = () => {
           />
 
           <FormControl fullWidth>
-            <InputLabel id="district-label">District *</InputLabel>
+            <InputLabel id="district-label">District</InputLabel>
             <Select
               labelId="district-label"
               value={district}
               label="District"
               onChange={(e) => setDistrict(e.target.value)}
             >
-              {districts.map((d) => (
+              {DISTRICTS.map((d) => (
                 <MenuItem key={d} value={d}>
                   {d}
                 </MenuItem>

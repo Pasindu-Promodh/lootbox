@@ -8,6 +8,8 @@ import {
   Skeleton,
 } from "@mui/material";
 import type { Product } from "../../types/product";
+import { formatPrice, discountPercent } from "../../utils/checkout";
+import { clickable } from "../../utils/a11y";
 
 type Props = {
   product: Product;
@@ -34,10 +36,11 @@ const ProductCard: React.FC<Props> = ({
 
   return (
     <Card
-      onClick={() => onClickProduct(product.id)}
+      {...clickable(() => onClickProduct(product.id), product.name)}
       sx={{
         ...sx,
         cursor: "pointer",
+        "&:focus-visible": { outline: "3px solid", outlineColor: "primary.main" },
         borderRadius: 2,
         overflow: "hidden",
         position: "relative",
@@ -163,7 +166,7 @@ const ProductCard: React.FC<Props> = ({
               fontWeight={500}
               sx={{ fontSize: fontSizes.price ?? "1.2rem" }}
             >
-              Rs {product.price}
+              {formatPrice(product.price)}
             </Typography>
 
             {/* Old price inline on desktop only */}
@@ -178,7 +181,7 @@ const ProductCard: React.FC<Props> = ({
                   display: { xs: "none", sm: "block" },
                 }}
               >
-                Rs {product.pre_discount_price}
+                {formatPrice(product.pre_discount_price)}
               </Typography>
               <Typography
                 variant="body2"
@@ -186,11 +189,7 @@ const ProductCard: React.FC<Props> = ({
                 fontWeight={600}
                 sx={{ fontSize: "0.8rem" }}
               >
-                {Math.round(
-                  ((product.pre_discount_price - product.price) /
-                    product.pre_discount_price) *
-                    100
-                )}
+                {discountPercent(product.pre_discount_price, product.price)}
                 % OFF
               </Typography>
               </>
@@ -204,11 +203,7 @@ const ProductCard: React.FC<Props> = ({
                 fontWeight={600}
                 sx={{ fontSize: "0.8rem" }}
               >
-                {Math.round(
-                  ((product.pre_discount_price - product.price) /
-                    product.pre_discount_price) *
-                    100
-                )}
+                {discountPercent(product.pre_discount_price, product.price)}
                 % OFF
               </Typography>
             )} */}
@@ -225,7 +220,7 @@ const ProductCard: React.FC<Props> = ({
                 display: { xs: "block", sm: "none" },
               }}
             >
-              Rs {product.pre_discount_price}
+              {formatPrice(product.pre_discount_price)}
             </Typography>
           )}
         </Box>

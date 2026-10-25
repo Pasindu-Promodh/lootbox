@@ -15,6 +15,8 @@ import {
 import { useNavigate } from "react-router-dom";
 import type { Product } from "../types/product";
 import { searchProducts } from "../data/fetchProducts";
+import { clickable } from "../utils/a11y";
+import { formatPrice, discountPercent } from "../utils/checkout";
 
 interface ProductSearchProps {
   isMobile?: boolean;
@@ -46,40 +48,39 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
     onCloseFullScreen?.();
   };
 
-  const debounce = (func: (...args: any[]) => void, delay: number) => {
-    let timer: number;
-    return (...args: any[]) => {
-      clearTimeout(timer);
-      timer = window.setTimeout(() => func(...args), delay);
-    };
+  // Debounce typing, and ignore responses from searches that were superseded
+  // by newer input (they can resolve out of order).
+  const debounceTimer = useRef<number | undefined>(undefined);
+  const latestRequest = useRef(0);
+
+  const runSearch = async (value: string) => {
+    const requestId = ++latestRequest.current;
+
+    if (!value.trim()) {
+      setResults([]);
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const data = await searchProducts(value, 8);
+      if (requestId !== latestRequest.current) return;
+      setResults(data);
+      setOpenDropdown(true);
+    } catch (err) {
+      console.error(err);
+      if (requestId === latestRequest.current) setResults([]);
+    } finally {
+      if (requestId === latestRequest.current) setLoading(false);
+    }
   };
-
-  const debouncedSearch = useRef(
-    debounce(async (value: string) => {
-      if (!value.trim()) {
-        setResults([]);
-        setLoading(false);
-        return;
-      }
-
-      setLoading(true);
-      try {
-        const data = await searchProducts(value, 8); // your API function
-        setResults(data);
-        setOpenDropdown(true);
-      } catch (err) {
-        console.error(err);
-        setResults([]);
-      } finally {
-        setLoading(false);
-      }
-    }, 500),
-  ).current;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setSearch(value);
-    debouncedSearch(value); // trigger debounced API search
+    window.clearTimeout(debounceTimer.current);
+    debounceTimer.current = window.setTimeout(() => runSearch(value), 500);
   };
 
   const renderResults = () => (
@@ -112,7 +113,7 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
       {results.map((p) => (
         <Card
           key={p?.id}
-          onClick={() => handleSelectProduct(p?.id)}
+          {...clickable(() => handleSelectProduct(p?.id), p?.name)}
           sx={{
             display: "flex",
             alignItems: "center",
@@ -181,7 +182,7 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
                 fontWeight={500}
                 sx={{ fontSize: "1.1rem", color: "primary.main" }}
               >
-                Rs {p?.price}
+                {formatPrice(p?.price)}
               </Typography>
               {p?.pre_discount_price > p?.price && (
                 <>
@@ -193,7 +194,7 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
                       fontSize: "0.75rem",
                     }}
                   >
-                    Rs {p?.pre_discount_price}
+                    {formatPrice(p?.pre_discount_price)}
                   </Typography>
                   <Typography
                     variant="body2"
@@ -201,11 +202,7 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
                     fontWeight={600}
                     sx={{ fontSize: "0.8rem" }}
                   >
-                    {Math.round(
-                      ((p?.pre_discount_price - p?.price) /
-                        p?.pre_discount_price) *
-                        100,
-                    )}
+                    {discountPercent(p.pre_discount_price, p.price)}
                     % OFF
                   </Typography>
                 </>
@@ -217,10 +214,7 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
                   fontWeight={600}
                   sx={{ fontSize: "0.8rem" }}
                 >
-                  {Math.round(
-                    ((p?.pre_discount_price - p?.price) / p?.pre_discount_price) *
-                      100
-                  )}
+                  {discountPercent(p.pre_discount_price, p.price)}
                   % OFF
                 </Typography>
               )} */}
@@ -303,7 +297,7 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
                 {results.map((p) => (
                   <Card
                     key={p?.id}
-                    onClick={() => handleSelectProduct(p?.id)}
+                    {...clickable(() => handleSelectProduct(p?.id), p?.name)}
                     sx={{
                       display: "flex",
                       alignItems: "center",
@@ -359,7 +353,7 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
                           fontWeight={500}
                           sx={{ fontSize: "1.1rem", color: "primary.main" }}
                         >
-                          Rs {p?.price}
+                          {formatPrice(p?.price)}
                         </Typography>
                         {p?.pre_discount_price > p?.price && (
                           <>
@@ -371,7 +365,7 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
                                 fontSize: "0.75rem",
                               }}
                             >
-                              Rs {p?.pre_discount_price}
+                              {formatPrice(p?.pre_discount_price)}
                             </Typography>
                             <Typography
                               variant="body2"
@@ -379,11 +373,7 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
                               fontWeight={600}
                               sx={{ fontSize: "0.8rem" }}
                             >
-                              {Math.round(
-                                ((p?.pre_discount_price - p?.price) /
-                                  p?.pre_discount_price) *
-                                  100,
-                              )}
+                              {discountPercent(p.pre_discount_price, p.price)}
                               % OFF
                             </Typography>
                           </>

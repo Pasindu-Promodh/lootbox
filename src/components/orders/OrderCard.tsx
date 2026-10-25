@@ -25,10 +25,11 @@ import { supabase } from "../../supabase";
 import { useNotification } from "../../context/NotificationContext";
 import ConfirmDialog from "../common/ConfirmDialog";
 import { getWhatsAppLink } from "../../utils/whatsapp";
+import type { Product } from "../../types/product";
 
 interface Props {
   order: Order;
-  productMap: Record<string, any>;
+  productMap: Record<string, Product>;
   userId: string;
   expanded: boolean;
   onToggle: () => void;
@@ -134,6 +135,7 @@ const OrderCard: React.FC<Props> = ({
                 <IconButton
                   size="small"
                   onClick={() => copyToClipboard(order.id)}
+                  aria-label="Copy order ID"
                 >
                   <ContentCopyIcon fontSize="inherit" />
                 </IconButton>
@@ -201,7 +203,9 @@ const OrderCard: React.FC<Props> = ({
           </AccordionDetails>
         </Accordion>
         <Box display="flex" gap={2} flexWrap="wrap">
-          {latestStatus !== "delivered" && latestStatus !== "cancelled" && (
+          {/* Only a shipped order can be confirmed as received; earlier
+              statuses would wrongly move it into the finance "to receive" bucket. */}
+          {latestStatus === "shipped" && (
             <Button
               variant="contained"
               color="success"

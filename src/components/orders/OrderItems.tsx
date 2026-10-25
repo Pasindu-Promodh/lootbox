@@ -1,9 +1,11 @@
 import { Box, Skeleton, Tooltip, Typography } from "@mui/material";
 import type { OrderItem } from "../../types/order";
+import type { Product } from "../../types/product";
+import { clickable } from "../../utils/a11y";
 
 interface Props {
   items: OrderItem[];
-  productMap: Record<string, any>;
+  productMap: Record<string, Product>;
   onClickProduct: (id: string) => void;
 }
 
@@ -27,7 +29,9 @@ const OrderItems: React.FC<Props> = ({ items, productMap, onClickProduct }) => {
               transition: "transform 0.2s",
               "&:hover": { transform: "scale(1.01)" },
             }}
-            onClick={() => product && onClickProduct(product.id)}
+            {...(product
+              ? clickable(() => onClickProduct(product.id), `View ${product.name}`)
+              : {})}
           >
             <Box
               sx={{

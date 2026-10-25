@@ -19,7 +19,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import PersonIcon from "@mui/icons-material/Person";
 
-import { useNavigate } from "react-router-dom";
+import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { useTheme, useMediaQuery } from "@mui/material";
 
 import ProductSearch from "./ProductSearch";
@@ -90,7 +90,9 @@ const Navbar: React.FC = () => {
           {/* Logo */}
 
           <Box
-            onClick={() => navigate("/")}
+            component={RouterLink}
+            to="/"
+            aria-label="Pickio home"
             sx={{
               display: "flex",
               alignItems: "center",

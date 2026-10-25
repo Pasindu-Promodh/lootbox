@@ -49,7 +49,7 @@ const WishListDrawer: React.FC<WishListDrawerProps> = ({
         }}
       >
         <Typography variant="h6">Your WishList</Typography>
-        <IconButton onClick={onClose}>
+        <IconButton onClick={onClose} aria-label="Close wishlist">
           <CloseIcon />
         </IconButton>
       </Box>

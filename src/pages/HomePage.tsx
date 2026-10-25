@@ -11,10 +11,31 @@ import { getProducts } from "../data/fetchProducts";
 import ProductSlider from "../components/common/ProductSlider";
 import { useCart } from "../context/CartContext";
 import type { Product } from "../types/product";
+import { usePageTitle } from "../utils/usePageTitle";
 import { keyframes } from "@mui/system";
+
+const flyInLeft = keyframes`
+0% { opacity: 0; transform: translateX(-100px) rotate(-10deg); }
+60% { transform: translateX(10px) rotate(5deg); opacity: 1; }
+80% { transform: translateX(-5px) rotate(-2deg); }
+100% { transform: translateX(0) rotate(0deg); }
+`;
+
+const flyInRight = keyframes`
+0% { opacity: 0; transform: translateX(100px) rotate(10deg); }
+60% { transform: translateX(-10px) rotate(-5deg); opacity: 1; }
+80% { transform: translateX(5px) rotate(2deg); }
+100% { transform: translateX(0) rotate(0deg); }
+`;
+
+const floatGlow = keyframes`
+0%, 100% { transform: translateY(0); box-shadow: 0 0 10px rgba(255,255,255,0.5); }
+50% { transform: translateY(-6px); box-shadow: 0 0 20px rgba(255,255,255,0.9); }
+`;
 
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
+  usePageTitle();
   const { addToCart } = useCart();
 
   const theme = useTheme();
@@ -36,51 +57,25 @@ const HomePage: React.FC = () => {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    loadHomeProducts();
+
+    let cancelled = false;
+    // The three rows are independent, so fetch them in parallel.
+    Promise.all([
+      getProducts({ limit: 6, featured: true }),
+      getProducts({ limit: 6, orderBy: { column: "sold_count" } }),
+      getProducts({ limit: 6, orderBy: { column: "added_date" } }),
+    ]).then(([featured, best, newProds]) => {
+      if (cancelled) return;
+      setFeaturedProducts(featured);
+      setBestSellers(best);
+      setNewArrivals(newProds);
+      setLoading(false);
+    });
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
-
-  async function loadHomeProducts() {
-    setLoading(true);
-
-    // Fetch only featured products
-    const featured = await getProducts({ limit: 6, featured: true });
-    setFeaturedProducts(featured);
-
-    // Fetch best sellers (sorted by soldCount)
-    const best = await getProducts({
-      limit: 6,
-      orderBy: { column: "sold_count" },
-    });
-    setBestSellers(best);
-
-    // Fetch newest arrivals (sorted by addedDate)
-    const newProds = await getProducts({
-      limit: 6,
-      orderBy: { column: "added_date" },
-    });
-    setNewArrivals(newProds);
-
-    setLoading(false);
-  }
-
-  const flyInLeft = keyframes`
-  0% { opacity: 0; transform: translateX(-100px) rotate(-10deg); }
-  60% { transform: translateX(10px) rotate(5deg); opacity: 1; }
-  80% { transform: translateX(-5px) rotate(-2deg); }
-  100% { transform: translateX(0) rotate(0deg); }
-`;
-
-  const flyInRight = keyframes`
-  0% { opacity: 0; transform: translateX(100px) rotate(10deg); }
-  60% { transform: translateX(-10px) rotate(-5deg); opacity: 1; }
-  80% { transform: translateX(5px) rotate(2deg); }
-  100% { transform: translateX(0) rotate(0deg); }
-`;
-
-  const floatGlow = keyframes`
-  0%, 100% { transform: translateY(0); box-shadow: 0 0 10px rgba(255,255,255,0.5); }
-  50% { transform: translateY(-6px); box-shadow: 0 0 20px rgba(255,255,255,0.9); }
-`;
 
   // if (loading) {
   //   return (
@@ -92,38 +87,8 @@ const HomePage: React.FC = () => {
 
   return (
     <div>
-      {/* Hero Section */}
-      {/* <Box
-        sx={{
-          backgroundImage:
-            "url(https://placehold.co/1200x400?text=LootBox&bg=555&fg=fff)",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          color: "#fff",
-          py: { xs: 6, md: 12 },
-          textAlign: "center",
-        }}
-      >
-        <Typography variant="h3" sx={{ fontWeight: "bold", mb: 2 }}>
-          Shop the Best Deals!
-        </Typography>
-        <Typography variant="h6" sx={{ mb: 3, px: { xs: 2, md: 0 } }}>
-          Find your favorite gadgets, accessories, and more at amazing prices.
-        </Typography>
-        <Button
-          variant="contained"
-          color="secondary"
-          size="large"
-          onClick={() => navigate("/shop")}
-        >
-          Start Shopping
-        </Button>
-      </Box> */}
-
       <Box
         sx={{
-          // backgroundImage:
-          //   "url(https://placehold.co/1200x400?text=Pickio&bg=555&fg=fff)",
           backgroundImage: isDesktop ? "url(/bg.png)" : "url(/bg-mobile.png)",
           backgroundSize: "cover",
           backgroundPosition: "center",

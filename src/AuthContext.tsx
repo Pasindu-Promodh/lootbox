@@ -44,33 +44,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `https://pickio.lk`,
-          // redirectTo: `https://pasindu-promodh.github.io/lootbox/`,
-          // redirectTo: `http://localhost:5173`,
+          // Current origin, so the same build works on pickio.lk and
+          // localhost (each must be in Supabase Auth's redirect allow-list).
+          redirectTo: window.location.origin,
           queryParams: {
-            // access_type: 'offline',
-            // prompt: 'consent',
             prompt: "select_account",
           },
         },
       });
 
       if (error) throw error;
-    } catch (error: any) {
-      console.error("Error signing in:", error.message);
+    } catch (error) {
+      console.error("Error signing in:", (error as Error).message);
       throw error;
     }
   };
-
-  // const signOut = async () => {
-  //   try {
-  //     const { error } = await supabase.auth.signOut();
-  //     if (error) throw error;
-  //   } catch (error: any) {
-  //     console.error("Error signing out:", error.message);
-  //     throw error;
-  //   }
-  // };
 
   const signOut = async () => {
     try {
@@ -87,8 +75,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       // Reset local state manually
       setSession(null);
       setUser(null);
-    } catch (err: any) {
-      console.error("Unexpected sign-out error:", err.message);
+    } catch (err) {
+      console.error("Unexpected sign-out error:", (err as Error).message);
     }
   };
 

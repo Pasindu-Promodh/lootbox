@@ -37,10 +37,10 @@ const HorizontalScroller: React.FC<Props> = ({
           display="flex"
           gap={1}
         >
-          <IconButton size="small" onClick={() => scroll("left")}>
+          <IconButton size="small" onClick={() => scroll("left")} aria-label="Scroll left">
             <ChevronLeftIcon />
           </IconButton>
-          <IconButton size="small" onClick={() => scroll("right")}>
+          <IconButton size="small" onClick={() => scroll("right")} aria-label="Scroll right">
             <ChevronRightIcon />
           </IconButton>
         </Box>

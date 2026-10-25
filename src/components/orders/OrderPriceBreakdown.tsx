@@ -2,7 +2,17 @@ import { Box, Typography, Divider, Paper, useMediaQuery } from "@mui/material";
 import type { Order } from "../../types/order";
 import { useTheme } from "@mui/material/styles";
 
-const Row = ({ label, value, bold, error }: any) => (
+const Row = ({
+  label,
+  value,
+  bold,
+  error,
+}: {
+  label: string;
+  value: string;
+  bold?: boolean;
+  error?: boolean;
+}) => (
   <Box
     display="flex"
     justifyContent="space-between"

@@ -41,7 +41,7 @@ export default function FullscreenViewer({
   if (images.length === 0) return null;
 
   return (
-    <Modal open={open} onClose={onClose}>
+    <Modal open={open} onClose={onClose} aria-label="Image viewer">
       <Box
         sx={{
           width: "100vw",
@@ -61,6 +61,7 @@ export default function FullscreenViewer({
             onClose();
           }}
           sx={{ position: "absolute", top: 20, right: 20, color: "white" }}
+          aria-label="Close image viewer"
         >
           <CloseIcon />
         </IconButton>
@@ -71,6 +72,7 @@ export default function FullscreenViewer({
             e.stopPropagation();
             onPrev();
           }}
+          aria-label="Previous image"
           sx={{
             position: "absolute",
             left: 20,
@@ -87,6 +89,7 @@ export default function FullscreenViewer({
             e.stopPropagation();
             onNext();
           }}
+          aria-label="Next image"
           sx={{
             position: "absolute",
             right: 20,

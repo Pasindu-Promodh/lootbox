@@ -61,7 +61,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({
         }}
       >
         <Typography variant="h6">Your Cart</Typography>
-        <IconButton onClick={onClose}>
+        <IconButton onClick={onClose} aria-label="Close cart">
           <CloseIcon />
         </IconButton>
       </Box>

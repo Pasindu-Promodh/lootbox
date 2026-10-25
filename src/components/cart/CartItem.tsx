@@ -10,6 +10,8 @@ import {
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useCart } from "../../context/CartContext";
 import type { Cart } from "../../types/cart";
+import { formatPrice, discountPercent } from "../../utils/checkout";
+import { clickable } from "../../utils/a11y";
 
 interface Props {
   item: Cart;
@@ -37,10 +39,10 @@ const CartItem: React.FC<Props> = ({ item, onClose, onClickProduct }) => {
         transition: "transform 0.2s",
         "&:hover": { transform: "scale(1.01)" },
       }}
-      onClick={() => {
+      {...clickable(() => {
         onClose?.();
         onClickProduct(item?.id);
-      }}
+      }, `View ${item?.name}`)}
     >
       <Box
         sx={{
@@ -105,7 +107,7 @@ const CartItem: React.FC<Props> = ({ item, onClose, onClickProduct }) => {
             fontWeight={500}
             sx={{ fontSize: "1rem", color: "primary.main" }}
           >
-            Rs {item?.price}
+            {formatPrice(item?.price)}
           </Typography>
 
           {item?.pre_discount_price > item?.price && (
@@ -115,7 +117,7 @@ const CartItem: React.FC<Props> = ({ item, onClose, onClickProduct }) => {
                 color="text.secondary"
                 sx={{ textDecoration: "line-through", fontSize: "0.75rem" }}
               >
-                Rs {item?.pre_discount_price}
+                {formatPrice(item?.pre_discount_price)}
               </Typography>
               <Typography
                 variant="body2"
@@ -123,11 +125,7 @@ const CartItem: React.FC<Props> = ({ item, onClose, onClickProduct }) => {
                 fontWeight={600}
                 sx={{ fontSize: "0.8rem" }}
               >
-                {Math.round(
-                  ((item?.pre_discount_price - item?.price) /
-                    item?.pre_discount_price) *
-                    100,
-                )}
+                {discountPercent(item.pre_discount_price, item.price)}
                 % OFF
               </Typography>
             </>
@@ -180,7 +178,7 @@ const CartItem: React.FC<Props> = ({ item, onClose, onClickProduct }) => {
             fontWeight={500}
             sx={{ fontSize: "1rem", color: "primary.main" }}
           >
-            Rs {item.price * item.quantity}
+            {formatPrice(item.price * item.quantity)}
           </Typography>
         </Box> */}
       </Box>
@@ -191,6 +189,7 @@ const CartItem: React.FC<Props> = ({ item, onClose, onClickProduct }) => {
           removeFromCart(item?.id);
         }}
         color="error"
+        aria-label={`Remove ${item?.name} from cart`}
       >
         <DeleteIcon />
       </IconButton>

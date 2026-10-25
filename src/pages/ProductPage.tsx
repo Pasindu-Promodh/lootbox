@@ -14,9 +14,12 @@ import FullscreenViewer from "../components/FullscreenViewer";
 import { useCart } from "../context/CartContext";
 import { useWishList } from "../context/WishListContext";
 import { getWhatsAppLink } from "../utils/whatsapp";
+import { usePageTitle } from "../utils/usePageTitle";
+import { clickable } from "../utils/a11y";
 
 import { getProductById, getProducts } from "../data/fetchProducts";
 import type { Product } from "../types/product";
+import { formatPrice, discountPercent } from "../utils/checkout";
 
 export default function ProductPage() {
   const { productId } = useParams();
@@ -24,8 +27,11 @@ export default function ProductPage() {
   const { addToCart } = useCart();
   const { wishList, addToWishList, removeFromWishList } = useWishList();
 
-  const [loading, setLoading] = useState(true);
+  // Which productId has finished loading; anything else means "loading".
+  const [loadedId, setLoadedId] = useState<string | undefined>(undefined);
+  const loading = loadedId !== productId;
   const [product, setProduct] = useState<Product | null>(null);
+  usePageTitle(product?.name, product?.description);
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
   const [mainImage, setMainImage] = useState<string | null>(null);
   const [viewerOpen, setViewerOpen] = useState(false);
@@ -35,35 +41,35 @@ export default function ProductPage() {
     ? wishList.some((item) => item.id === product.id)
     : false;
 
-  // Load product on mount or when productId changes
+  // Load product on mount or when productId changes. The cancelled flag
+  // drops responses for a product the user has already navigated away from.
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
-    if (productId) loadProduct();
-  }, [productId]);
+    let cancelled = false;
 
-  const loadProduct = async () => {
-    setLoading(true);
-    const prod = await getProductById(productId);
-    setProduct(prod);
+    const loadProduct = async () => {
+      const prod = await getProductById(productId);
+      if (cancelled) return;
 
-    if (prod) setMainImage(prod?.images[0]?.main || null);
+      setProduct(prod);
+      setMainImage(prod?.images[0]?.main || null);
+      setZoomed(false);
 
-    // Fetch related products by main category, excluding current product
-    if (prod) {
-      const related = await getProducts({
-        category: prod?.category,
-        limit: 10,
-      });
+      // Related products: same main category, excluding this one
+      const related = prod
+        ? await getProducts({ category: prod.category, limit: 11 })
+        : [];
+      if (cancelled) return;
+
       setRelatedProducts(related.filter((p) => p.id !== prod?.id).slice(0, 10));
-    }
+      setLoadedId(productId);
+    };
 
-    setLoading(false);
-  };
-
-  useEffect(() => {
-    if (product) setMainImage(product.images[0]?.main || "");
-    setZoomed(false);
-  }, [product]);
+    loadProduct();
+    return () => {
+      cancelled = true;
+    };
+  }, [productId]);
 
   const index = mainImage
     ? (product?.images.findIndex((img) => img.main === mainImage) ?? 0)
@@ -152,7 +158,7 @@ export default function ProductPage() {
               overflow: "hidden",
               cursor: "zoom-in",
             }}
-            onClick={() => setViewerOpen(true)}
+            {...clickable(() => setViewerOpen(true), "View image fullscreen")}
           >
             {mainImage ? (
               <CardMedia
@@ -177,10 +183,11 @@ export default function ProductPage() {
           </Box>
 
           <Box sx={{ display: "flex", gap: 2, mt: 2, overflowX: "auto" }}>
-            {product.images.map((img) => (
+            {product.images.map((img, i) => (
               <Box
                 key={img.main}
-                onClick={() => setMainImage(img.main)}
+                {...clickable(() => setMainImage(img.main), `Show image ${i + 1}`)}
+                aria-pressed={img.main === mainImage}
                 sx={{
                   width: 90,
                   height: 90,
@@ -196,6 +203,7 @@ export default function ProductPage() {
                 <CardMedia
                   component="img"
                   src={img.thumb}
+                  alt=""
                   sx={{ width: "100%", height: "100%", objectFit: "cover" }}
                 />
               </Box>
@@ -223,7 +231,7 @@ export default function ProductPage() {
 
           <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
             <Typography variant="h5" color="primary" fontWeight={700}>
-              Rs {product.price}
+              {formatPrice(product.price)}
             </Typography>
             {product.on_sale && (
               <>
@@ -231,15 +239,11 @@ export default function ProductPage() {
                   variant="body1"
                   sx={{ textDecoration: "line-through", opacity: 0.6 }}
                 >
-                  Rs {product.pre_discount_price}
+                  {formatPrice(product.pre_discount_price)}
                 </Typography>
                 <Typography color="error" fontWeight={600}>
                   Save{" "}
-                  {Math.round(
-                    ((product.pre_discount_price - product.price) /
-                      product.pre_discount_price) *
-                      100,
-                  )}
+                  {discountPercent(product.pre_discount_price, product.price)}
                   %
                 </Typography>
               </>
@@ -280,7 +284,7 @@ export default function ProductPage() {
               {product.in_stock ? "Add to Cart" : "Out of Stock"}
             </Button>
             <Button
-              variant={isInWishList ? "outlined" : "outlined"}
+              variant="outlined"
               size="large"
               sx={{ flex: 1 }}
               color={isInWishList ? "error" : "primary"}
